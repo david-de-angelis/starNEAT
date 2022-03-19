@@ -1,7 +1,7 @@
 from neat.config import ConfigParameter
 from neat.genome import DefaultGenomeConfig
 
-from starNEAT.Lobe import LobeConfig
+from starNEAT.LobeConfig import LobeConfig
 
 class BrainGenomeConfig(DefaultGenomeConfig):
 
