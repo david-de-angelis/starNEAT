@@ -10,6 +10,11 @@ from starNEAT.BrainGenome import BrainGenome
 xor_inputs = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
 xor_outputs = [   (0.0,),     (1.0,),     (1.0,),     (0.0,)]
 
+# Lobe_MoveRobberRef = "move_robber"
+# Lobe_BuildCityRef = "build_city"
+# Lobe_BuildRoadRef = "build_road"
+# Lobe_BuildSettlementRef = "build_settlement"
+
 def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
         genome.fitness = 4.0

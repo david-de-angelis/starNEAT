@@ -1,15 +1,8 @@
-import sys
 from neat import DefaultGenome
 from neat.genes import DefaultConnectionGene, DefaultNodeGene
 
 from starNEAT.BrainGenomeConfig import BrainGenomeConfig
 from starNEAT.Lobe import Lobe
-
-# i think this will only be required in the 'eval_genomes' function
-# Lobe_MoveRobberRef = "move_robber"
-# Lobe_BuildCityRef = "build_city"
-# Lobe_BuildRoadRef = "build_road"
-# Lobe_BuildSettlementRef = "build_settlement"
 
 class BrainGenome(DefaultGenome):
 
@@ -56,7 +49,7 @@ class BrainGenome(DefaultGenome):
         lobe = self.create_lobe(lobe_name)
         self.lobes[lobe_name] = lobe
 
-        lobe.configure_new(lobe_config)        
+        lobe.configure_new(lobe_config)
 
     # def configure_crossover(self, genome1, genome2, config):
     #     """ Configure a new genome by crossover from two parent genomes. """
@@ -111,12 +104,12 @@ class BrainGenome(DefaultGenome):
 
     @staticmethod
     def create_lobe(name, connections = {}, nodes = {}):
-        return Lobe(name, connections, nodes);
+        return Lobe(name, connections, nodes)
 
 
-    @staticmethod
-    def create_node(config, node_id):
-        """ does something """
+    # @staticmethod
+    # def create_node(config, node_id):
+    #     """ does something """
 
 
     # @staticmethod
