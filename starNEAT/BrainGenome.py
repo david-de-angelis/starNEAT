@@ -42,14 +42,14 @@ class BrainGenome(DefaultGenome):
 
 
     def configure_new(self, config):
-      """Configure a new genome based on the given configuration."""
-      #should this be here?
-      self.lobes = {}
-      for lobe_name, lobe_config in config.brain_lobes_config.items():
-        lobe = self.create_lobe(lobe_name)
-        self.lobes[lobe_name] = lobe
+        """Configure a new genome based on the given configuration."""
+        self.lobes = {}
+        for lobe_name, lobe_config in config.brain_lobes_config.items():
+            lobe = self.create_lobe(lobe_name)
+            self.lobes[lobe_name] = lobe
 
-        lobe.configure_new(lobe_config)
+            lobe.configure_new(lobe_config)
+
 
     # def configure_crossover(self, genome1, genome2, config):
     #     """ Configure a new genome by crossover from two parent genomes. """
@@ -98,7 +98,7 @@ class BrainGenome(DefaultGenome):
         print('probing size')
         num_enabled_connections = 0
         num_nodes = 0
-        for lobe in self.lobes.items():
+        for lobe in self.lobes.values():
             num_enabled_connections += sum([1 for cg in lobe.connections.values() if cg.enabled])
             num_nodes += len(lobe.nodes)
         return num_nodes, num_enabled_connections
