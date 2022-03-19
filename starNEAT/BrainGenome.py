@@ -89,13 +89,19 @@ class BrainGenome(DefaultGenome):
     #     """
 
 
-    # def size(self):
-    #     """
-    #     Returns genome 'complexity', taken to be
-    #     (number of nodes, number of enabled connections)
-    #     """
-    #     num_enabled_connections = sum([1 for cg in self.connections.values() if cg.enabled])
-    #     return len(self.nodes), num_enabled_connections
+    # I believe this is only for reporting purposes... if not, this may have to be re-worked
+    def size(self):
+        """
+        Returns genome 'complexity', taken to be
+        (number of nodes, number of enabled connections)
+        """
+        print('probing size')
+        num_enabled_connections = 0
+        num_nodes = 0
+        for lobe in self.lobes.items():
+            num_enabled_connections += sum([1 for cg in lobe.connections.values() if cg.enabled])
+            num_nodes += len(lobe.nodes)
+        return num_nodes, num_enabled_connections
 
 
     # def __str__(self):
