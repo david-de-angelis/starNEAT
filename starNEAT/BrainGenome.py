@@ -1,3 +1,4 @@
+from decimal import InvalidOperation
 from neat import DefaultGenome
 from neat.genes import DefaultConnectionGene, DefaultNodeGene
 
@@ -37,23 +38,49 @@ class BrainGenome(DefaultGenome):
     def __init__(self, key):
         super().__init__(key)
 
-        self.connections = None # these are no longer applicable, as the brain is now split into seperate lobes (NNs)
-        self.nodes = None # '' ^
+        self.lobes = {}
+
+        # these are no longer applicable, as the brain is now split into seperate lobes (NNs)
+        del self.connections
+        del self.nodes
 
 
     def configure_new(self, config):
         """Configure a new genome based on the given configuration."""
-        self.lobes = {}
+        
+        if self.lobes != {}:
+            raise Exception("Cannot overwrite an existing brain")
+
         for lobe_name, lobe_config in config.brain_lobes_config.items():
             lobe = self.create_lobe(lobe_name)
             self.lobes[lobe_name] = lobe
 
             lobe.configure_new(lobe_config)
 
-
-    # def configure_crossover(self, genome1, genome2, config):
-    #     """ Configure a new genome by crossover from two parent genomes. """
+    def configure_crossover(self, parent_brain_1, parent_brain_2, config):
+        """ Configure a new genome by crossover from two parent genomes. """
+        self.configure_new(config)
         
+        assert len(self.lobes) == len(parent_brain_1.lobes)
+        assert len(self.lobes) == len(parent_brain_2.lobes)
+
+        for lobe_name, lobe in self.lobes.items():
+            pb1_lobe = parent_brain_1.lobes[lobe_name]
+            pb2_lobe = parent_brain_2.lobes[lobe_name]
+
+            if (pb1_lobe == None or pb2_lobe == None):
+                raise Exception("Lobe", lobe_name, "not found on one of the parents during cross_over")
+
+            lobe_config = config.brain_lobes_config[lobe_name]
+            if lobe_config.lobe_inherits_fitness:
+                if (pb1_lobe.fitness == None):
+                    pb1_lobe.fitness = parent_brain_1.fitness
+
+                if (pb2_lobe.fitness == None):
+                    pb2_lobe.fitness = parent_brain_2.fitness
+            
+            lobe.configure_crossover(pb1_lobe, pb2_lobe, lobe_config)
+
 
     # def mutate(self, config):
     #     """ Mutates this genome. """
@@ -95,7 +122,6 @@ class BrainGenome(DefaultGenome):
         Returns genome 'complexity', taken to be
         (number of nodes, number of enabled connections)
         """
-        print('probing size')
         num_enabled_connections = 0
         num_nodes = 0
         for lobe in self.lobes.values():
@@ -113,14 +139,14 @@ class BrainGenome(DefaultGenome):
         return Lobe(name, connections, nodes)
 
 
-    # @staticmethod
-    # def create_node(config, node_id):
-    #     """ does something """
+    @staticmethod
+    def create_node(config, node_id):
+        raise InvalidOperation("A node cannot be created at the brain level")
 
 
-    # @staticmethod
-    # def create_connection(config, input_id, output_id):
-    #     """ does something """
+    @staticmethod
+    def create_connection(config, input_id, output_id):
+        raise InvalidOperation("A connection cannot be created at the brain level")
 
 
     # def connect_fs_neat_nohidden(self, config):

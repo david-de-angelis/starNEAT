@@ -22,7 +22,8 @@ class LobeConfig(DefaultGenomeConfig):
         ConfigParameter(prefix + 'node_delete_prob', float),
         ConfigParameter(prefix + 'single_structural_mutation', bool, 'false'),
         ConfigParameter(prefix + 'structural_mutation_surer', str, 'default'),
-        ConfigParameter(prefix + 'initial_connection', str, 'unconnected')
+        ConfigParameter(prefix + 'initial_connection', str, 'unconnected'),
+        ConfigParameter(prefix + 'lobe_inherits_fitness', bool, 'true'),
     ]
 
     for pm in lobe_params_metadata:
