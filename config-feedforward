@@ -1,13 +1,13 @@
 [NEAT]
 fitness_criterion     = max
 fitness_threshold     = 3.9
-pop_size              = 150
+pop_size              = 10
 reset_on_extinction   = False
 
 [BrainGenome]
 
 #NEW GLOBAL FIELDS:
-brain_lobes            = move_robber
+brain_lobes            = move_robber build_city
 brain_lobes2           = move_robber build_city build_road build_settlement
 
 
@@ -18,14 +18,14 @@ brain_lobes2           = move_robber build_city build_road build_settlement
 # network parameters
 move_robber_num_inputs              = 2
 move_robber_num_outputs             = 1
-move_robber_num_hidden              = 0
+move_robber_num_hidden              = 5
 
 # connection enable options
 move_robber_enabled_default         = True
 move_robber_enabled_mutate_rate     = 0.01
 
 move_robber_feed_forward            = True
-move_robber_initial_connection      = full
+move_robber_initial_connection      = full_nodirect
 
 # genome compatibility options
 move_robber_compatibility_disjoint_coefficient = 1.0
@@ -38,6 +38,34 @@ move_robber_conn_delete_prob        = 0.5
 # node add/remove rates
 move_robber_node_add_prob           = 0.2
 move_robber_node_delete_prob        = 0.2
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+### ### ### ### ###   BUILD CITY LOBE   ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# network parameters
+build_city_num_inputs              = 2
+build_city_num_outputs             = 1
+build_city_num_hidden              = 5
+
+# connection enable options
+build_city_enabled_default         = True
+build_city_enabled_mutate_rate     = 0.01
+
+build_city_feed_forward            = True
+build_city_initial_connection      = full_nodirect
+
+# genome compatibility options
+build_city_compatibility_disjoint_coefficient = 1.0
+build_city_compatibility_weight_coefficient   = 0.5
+
+# connection add/remove rates
+build_city_conn_add_prob           = 0.5
+build_city_conn_delete_prob        = 0.5
+
+# node add/remove rates
+build_city_node_add_prob           = 0.2
+build_city_node_delete_prob        = 0.2
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###       DEFAULT       ### ### ### ### ###
