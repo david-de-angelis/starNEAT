@@ -11,37 +11,69 @@ from starNEAT.nn.FeedForward import FeedForward
 xor_inputs = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
 xor_outputs = [   (0.0,),     (1.0,),     (1.0,),     (0.0,)]
 
-class Execution():
+class Experiment():
+    ### Catan Constants ###
     move_robber_id = "move_robber"
     build_city_id = "build_city"
     build_road_id = "build_road"
     build_settlement_id = "build_settlement"
 
-    lobe_move_robber_config = None
-    lobe_build_city_config = None
-    lobe_build_road_config = None
-    lobe_build_settlement_config = None
+    def __init__(self, config_file_path, epochs):
+        ### starNEAT Parameters ###
+        self.config_file_path = config_file_path
+        self.population = None
+        self.epochs = epochs
+        self.statistics_reporter = None
+        self.neural_network_type = FeedForward
+        self.config = neat.Config(BrainGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, self.config_file_path)
+    
+        ### Catan Parameters ###
+        self.lobe_move_robber_config = None
+        self.lobe_build_city_config = None
+        self.lobe_build_road_config = None
+        self.lobe_build_settlement_config = None
+
+    def run(self):
+        # Create the population, which is the top-level object for a NEAT run.
+        self.population = neat.Population(self.config)
+
+        # Add execution reporters (monitors the execution throughout its lifetime)
+        self.add_reporters()
+
+        # Execute the evaluation & evolution.
+        best_genome = self.population.run(self.evaluate_genomes, self.epochs)
+
+        self.wrap_up(best_genome)
 
 
-    @staticmethod
-    def evaluate_genomes(genomes, global_config):
+    def add_reporters(self):
+        self.statistics_reporter = neat.StatisticsReporter()
+        reporters = [
+            neat.StdOutReporter(True),
+            self.statistics_reporter,
+            neat.Checkpointer(5)
+        ]
+
+        for reporter in reporters:
+            self.population.add_reporter(reporter)
+
+
+    def evaluate_genomes(self, genomes, global_config):
         for genome_id, genome in genomes:
-            Execution.evaluate_genome(genome, global_config.genome_config)
+            self.evaluate_genome(genome, global_config.genome_config)
 
 
-    @staticmethod
-    def evaluate_genome(genome, genome_config):
-
+    def evaluate_genome(self, genome, genome_config):
         #Establishing required variables
-        Execution.set_lobe_config_cache(genome_config)
-        lobe_move_robber = genome.lobes[Execution.move_robber_id]
-        lobe_build_city = genome.lobes[Execution.build_city_id]
-        lobe_build_road = genome.lobes[Execution.build_road_id]
-        lobe_build_settlement = genome.lobes[Execution.build_settlement_id]
+        self.set_lobe_config_cache(genome_config)
+        lobe_move_robber = genome.lobes[Experiment.move_robber_id]
+        lobe_build_city = genome.lobes[Experiment.build_city_id]
+        lobe_build_road = genome.lobes[Experiment.build_road_id]
+        lobe_build_settlement = genome.lobes[Experiment.build_settlement_id]
 
         #Evaluating Genome
         genome.fitness = 4.0
-        nn_move_robber = FeedForward.create(lobe_move_robber, Execution.lobe_move_robber_config) #remember that this is currently only creating one lobe...
+        nn_move_robber = self.neural_network_type.create(lobe_move_robber, self.lobe_move_robber_config) #remember that this is currently only creating one lobe...
         for xi, xo in zip(xor_inputs, xor_outputs):
             output = nn_move_robber.activate(xi)
             # should probably also set the same fitness value for the lobes, 
@@ -50,61 +82,37 @@ class Execution():
             genome.fitness -= (output[0] - xo[0]) ** 2 
 
 
-    @staticmethod
-    def set_lobe_config_cache(genome_config):
-        if (Execution.lobe_move_robber_config == None):
-            Execution.lobe_move_robber_config = genome_config.brain_lobes_config[Execution.move_robber_id]
-        if (Execution.lobe_build_city_config == None):
-            Execution.lobe_build_city_config = genome_config.brain_lobes_config[Execution.build_city_id]
-        if (Execution.lobe_build_road_config == None):
-            Execution.lobe_build_road_config = genome_config.brain_lobes_config[Execution.build_road_id]
-        if (Execution.lobe_build_settlement_config == None):
-            Execution.lobe_build_settlement_config = genome_config.brain_lobes_config[Execution.build_settlement_id]
-    
-    @staticmethod
-    def run(config_file, num_generations):
-        # Initialise configuration.
-        population_type = neat.Population
-        genome_type = BrainGenome
-        reproduction_type = neat.DefaultReproduction
-        species_set_type = neat.DefaultSpeciesSet
-        stagnation_type = neat.DefaultStagnation
-        config = neat.Config(genome_type, reproduction_type, species_set_type, stagnation_type, config_file)
+    def set_lobe_config_cache(self, genome_config):
+        if (self.lobe_move_robber_config == None):
+            self.lobe_move_robber_config = genome_config.brain_lobes_config[Experiment.move_robber_id]
 
-        # Create the population, which is the top-level object for a NEAT run.
-        population = population_type(config)
+        if (self.lobe_build_city_config == None):
+            self.lobe_build_city_config = genome_config.brain_lobes_config[Experiment.build_city_id]
 
-        # Add execution reporters (monitors the execution throughout its lifetime)
-        statistics_reporter = neat.StatisticsReporter()
-        reporters = [
-            neat.StdOutReporter(True),
-            statistics_reporter,
-            neat.Checkpointer(5)
-        ]
+        if (self.lobe_build_road_config == None):
+            self.lobe_build_road_config = genome_config.brain_lobes_config[Experiment.build_road_id]
+            
+        if (self.lobe_build_settlement_config == None):
+            self.lobe_build_settlement_config = genome_config.brain_lobes_config[Experiment.build_settlement_id]
 
-        for reporter in reporters:
-            population.add_reporter(reporter)
-
-        # Execute the evaluation & evolution.
-        best_genome = population.run(Execution.evaluate_genomes, num_generations)
-
+    def wrap_up(self, best_genome):
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(best_genome))
 
         # Show output of the most fit genome against training data.
         print('\nOutput:')
-        winner_net = neat.nn.FeedForwardNetwork.create(best_genome, config)
+        winner_net = self.neural_network_type.create(best_genome, self.config)
         for xi, xo in zip(xor_inputs, xor_outputs):
             output = winner_net.activate(xi)
             print("input {!r}, expected output {!r}, got {!r}".format(xi, xo, output))
 
         node_names = {-1:'A', -2: 'B', 0:'A XOR B'}
-        visualize.draw_net(config, best_genome, True, node_names=node_names)
-        visualize.plot_stats(statistics_reporter, ylog=False, view=True)
-        visualize.plot_species(statistics_reporter, view=True)
+        visualize.draw_net(self.config, best_genome, True, node_names=node_names)
+        visualize.plot_stats(self.statistics_reporter, ylog=False, view=True)
+        visualize.plot_species(self.statistics_reporter, view=True)
 
         population = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
-        population.run(Execution.evaluate_genomes, 10)
+        population.run(self.evaluate_genomes, 10)
 
 
 if __name__ == '__main__':
@@ -114,4 +122,4 @@ if __name__ == '__main__':
 
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config-feedforward')
-    Execution.run(config_path, 300)
+    Experiment(config_path, 300).run()
