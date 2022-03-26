@@ -1,6 +1,4 @@
-import string
 from neat import DefaultGenome
-from neat.six_util import iteritems, iterkeys
 
 class Lobe(DefaultGenome):
   

@@ -48,72 +48,91 @@ class BrainGenome(DefaultGenome):
     def configure_new(self, config):
         """Configure a new genome based on the given configuration."""
         
+        self.initialise_empty_lobes(config)
+
+        for lobe in self.lobes.values():
+            lobe_config = config.brain_lobes_config[lobe.name]
+            lobe.configure_new(lobe_config)
+
+    def initialise_empty_lobes(self, config):
         if self.lobes != {}:
             raise Exception("Cannot overwrite an existing brain")
 
-        for lobe_name, lobe_config in config.brain_lobes_config.items():
+        for lobe_name in config.brain_lobes_config.keys():
             lobe = self.create_lobe(lobe_name)
             self.lobes[lobe_name] = lobe
 
-            lobe.configure_new(lobe_config)
-
     def configure_crossover(self, parent_brain_1, parent_brain_2, config):
         """ Configure a new genome by crossover from two parent genomes. """
-        self.configure_new(config)
+        self.initialise_empty_lobes(config)
         
         assert len(self.lobes) == len(parent_brain_1.lobes)
         assert len(self.lobes) == len(parent_brain_2.lobes)
 
-        for lobe_name, lobe in self.lobes.items():
-            pb1_lobe = parent_brain_1.lobes[lobe_name]
-            pb2_lobe = parent_brain_2.lobes[lobe_name]
+        for lobe in self.lobes.values():
+            pb1_lobe = parent_brain_1.lobes[lobe.name]
+            pb2_lobe = parent_brain_2.lobes[lobe.name]
 
             if (pb1_lobe == None or pb2_lobe == None):
-                raise Exception("Lobe", lobe_name, "not found on one of the parents during cross_over")
+                raise Exception("Lobe", lobe.name, "not found on one of the parents during cross_over")
 
-            lobe_config = config.brain_lobes_config[lobe_name]
+            lobe_config = config.brain_lobes_config[lobe.name]
             if lobe_config.lobe_inherits_fitness:
                 if (pb1_lobe.fitness == None):
                     pb1_lobe.fitness = parent_brain_1.fitness
 
                 if (pb2_lobe.fitness == None):
                     pb2_lobe.fitness = parent_brain_2.fitness
-            
+
             lobe.configure_crossover(pb1_lobe, pb2_lobe, lobe_config)
 
 
-    # def mutate(self, config):
-    #     """ Mutates this genome. """
+    def mutate(self, config):
+        """ Mutates this genome. """
+        raise NotImplementedError()
 
 
-    # def mutate_add_node(self, config):
-    #     """ does something """
+    def mutate_add_node(self, config):
+        """ does something """
+        raise NotImplementedError()
 
 
-    # def add_connection(self, config, input_key, output_key, weight, enabled):
-    #     """ does something """
+    def add_connection(self, config, input_key, output_key, weight, enabled):
+        """ does something """
+        raise NotImplementedError()
 
 
-    # def mutate_add_connection(self, config):
-    #     """
-    #     Attempt to add a new connection, the only restriction being that the output
-    #     node cannot be one of the network input pins.
-    #     """
+    def mutate_add_connection(self, config):
+        """
+        Attempt to add a new connection, the only restriction being that the output
+        node cannot be one of the network input pins.
+        """
+        raise NotImplementedError()
 
 
-    # def mutate_delete_node(self, config):
-    #     """ does something """
+    def mutate_delete_node(self, config):
+        """ does something """
+        raise NotImplementedError()
 
 
-    # def mutate_delete_connection(self):
-    #     """ does something """
+    def mutate_delete_connection(self):
+        """ does something """
+        raise NotImplementedError()
 
 
-    # def distance(self, other, config):
-    #     """
-    #     Returns the genetic distance between this genome and the other. This distance value
-    #     is used to compute genome compatibility for speciation.
-    #     """
+    def distance(self, other, config):
+        """
+        Returns the genetic distance between this genome and the other. This distance value
+        is used to compute genome compatibility for speciation.
+        """
+        distance = 0.0
+        for lobe in self.lobes.values():
+            other_lobe = other.lobes[lobe.name]
+            lobe_config = config.brain_lobes_config[lobe.name]
+
+            distance += lobe.distance(other_lobe, lobe_config)
+            
+        return distance / float(len(self.lobes))
 
 
     # I believe this is only for reporting purposes... if not, this may have to be re-worked
@@ -130,12 +149,12 @@ class BrainGenome(DefaultGenome):
         return num_nodes, num_enabled_connections
 
 
-    # def __str__(self):
-    #     """ does something """
+    def __str__(self):
+        """ does something """
+        raise NotImplementedError()
 
 
-    @staticmethod
-    def create_lobe(name, connections = {}, nodes = {}):
+    def create_lobe(self, name, connections = None, nodes = None):
         return Lobe(name, connections, nodes)
 
 
@@ -149,50 +168,58 @@ class BrainGenome(DefaultGenome):
         raise InvalidOperation("A connection cannot be created at the brain level")
 
 
-    # def connect_fs_neat_nohidden(self, config):
-    #     """
-    #     Randomly connect one input to all output nodes
-    #     (FS-NEAT without connections to hidden, if any).
-    #     Originally connect_fs_neat.
-    #     """
+    def connect_fs_neat_nohidden(self, config):
+        """
+        Randomly connect one input to all output nodes
+        (FS-NEAT without connections to hidden, if any).
+        Originally connect_fs_neat.
+        """
+        raise NotImplementedError()
 
 
-    # def connect_fs_neat_hidden(self, config):
-    #     """
-    #     Randomly connect one input to all hidden and output nodes
-    #     (FS-NEAT with connections to hidden, if any).
-    #     """
+    def connect_fs_neat_hidden(self, config):
+        """
+        Randomly connect one input to all hidden and output nodes
+        (FS-NEAT with connections to hidden, if any).
+        """
+        raise NotImplementedError()
 
 
-    # def compute_full_connections(self, config, direct):
-    #     """
-    #     Compute connections for a fully-connected feed-forward genome--each
-    #     input connected to all hidden nodes
-    #     (and output nodes if ``direct`` is set or there are no hidden nodes),
-    #     each hidden node connected to all output nodes.
-    #     (Recurrent genomes will also include node self-connections.)
-    #     """
+    def compute_full_connections(self, config, direct):
+        """
+        Compute connections for a fully-connected feed-forward genome--each
+        input connected to all hidden nodes
+        (and output nodes if ``direct`` is set or there are no hidden nodes),
+        each hidden node connected to all output nodes.
+        (Recurrent genomes will also include node self-connections.)
+        """
+        raise NotImplementedError()
 
 
-    # def connect_full_nodirect(self, config):
-    #     """
-    #     Create a fully-connected genome
-    #     (except without direct input-output unless no hidden nodes).
-    #     """
+    def connect_full_nodirect(self, config):
+        """
+        Create a fully-connected genome
+        (except without direct input-output unless no hidden nodes).
+        """
+        raise NotImplementedError()
 
 
-    # def connect_full_direct(self, config):
-    #     """ Create a fully-connected genome, including direct input-output connections. """
+    def connect_full_direct(self, config):
+        """ Create a fully-connected genome, including direct input-output connections. """
+        raise NotImplementedError()
 
 
-    # def connect_partial_nodirect(self, config):
-    #     """
-    #     Create a partially-connected genome,
-    #     with (unless no hidden nodes) no direct input-output connections."""
+    def connect_partial_nodirect(self, config):
+        """
+        Create a partially-connected genome,
+        with (unless no hidden nodes) no direct input-output connections.
+        """
+        raise NotImplementedError()
 
 
-    # def connect_partial_direct(self, config):
-    #     """
-    #     Create a partially-connected genome,
-    #     including (possibly) direct input-output connections.
-    #     """
+    def connect_partial_direct(self, config):
+        """
+        Create a partially-connected genome,
+        including (possibly) direct input-output connections.
+        """
+        raise NotImplementedError()
