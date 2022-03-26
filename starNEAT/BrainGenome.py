@@ -89,7 +89,9 @@ class BrainGenome(DefaultGenome):
 
     def mutate(self, config):
         """ Mutates this genome. """
-        raise NotImplementedError()
+        for lobe in self.lobes.values():
+            lobe_config = config.brain_lobes_config[lobe.name]
+            lobe.mutate(lobe_config)
 
 
     def mutate_add_node(self, config):
