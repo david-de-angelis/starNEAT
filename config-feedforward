@@ -7,8 +7,7 @@ reset_on_extinction   = False
 [BrainGenome]
 
 #NEW GLOBAL FIELDS:
-brain_lobes            = move_robber build_city
-brain_lobes2           = move_robber build_city build_road build_settlement
+brain_lobes           = move_robber build_city build_road build_settlement
 
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
@@ -66,6 +65,62 @@ build_city_conn_delete_prob        = 0.5
 # node add/remove rates
 build_city_node_add_prob           = 0.2
 build_city_node_delete_prob        = 0.2
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+### ### ### ### ###   BUILD ROAD LOBE   ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# network parameters
+build_road_num_inputs              = 2
+build_road_num_outputs             = 1
+build_road_num_hidden              = 5
+
+# connection enable options
+build_road_enabled_default         = True
+build_road_enabled_mutate_rate     = 0.01
+
+build_road_feed_forward            = True
+build_road_initial_connection      = full_nodirect
+
+# genome compatibility options
+build_road_compatibility_disjoint_coefficient = 1.0
+build_road_compatibility_weight_coefficient   = 0.5
+
+# connection add/remove rates
+build_road_conn_add_prob           = 0.5
+build_road_conn_delete_prob        = 0.5
+
+# node add/remove rates
+build_road_node_add_prob           = 0.2
+build_road_node_delete_prob        = 0.2
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+### ### ### ###    BUILD SETTLEMENT LOBE    ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# network parameters
+build_settlement_num_inputs              = 2
+build_settlement_num_outputs             = 1
+build_settlement_num_hidden              = 5
+
+# connection enable options
+build_settlement_enabled_default         = True
+build_settlement_enabled_mutate_rate     = 0.01
+
+build_settlement_feed_forward            = True
+build_settlement_initial_connection      = full_nodirect
+
+# genome compatibility options
+build_settlement_compatibility_disjoint_coefficient = 1.0
+build_settlement_compatibility_weight_coefficient   = 0.5
+
+# connection add/remove rates
+build_settlement_conn_add_prob           = 0.5
+build_settlement_conn_delete_prob        = 0.5
+
+# node add/remove rates
+build_settlement_node_add_prob           = 0.2
+build_settlement_node_delete_prob        = 0.2
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###       DEFAULT       ### ### ### ### ###
