@@ -35,6 +35,6 @@ class FeedForward(FeedForwardNetwork):
                 activation_function = lobe_config.activation_defs.get(ng.activation)
                 node_evals.append((node, activation_function, aggregation_function, ng.bias, ng.response, inputs))
 
-        return FeedForwardNetwork(lobe_config.input_keys, lobe_config.output_keys, node_evals)
+        return FeedForward(lobe_config.input_keys, lobe_config.output_keys, node_evals)
 
 
