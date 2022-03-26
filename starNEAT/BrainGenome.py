@@ -29,7 +29,8 @@ class BrainGenome(DefaultGenome):
     """
     @classmethod
     def parse_config(cls, param_dict):
-        #Note: DefaultNodeGene & DefaultConnectionGene are common between all lobes (functionality has not been implemented to support different Node/Conenction Genes per lobe)
+        #Note: DefaultNodeGene & DefaultConnectionGene are common between all lobes 
+        # (functionality has not been implemented to support different Node/Conenction Genes per lobe)
         param_dict['node_gene_type'] = DefaultNodeGene
         param_dict['connection_gene_type'] = DefaultConnectionGene
         return BrainGenomeConfig(param_dict)
@@ -54,6 +55,7 @@ class BrainGenome(DefaultGenome):
             lobe_config = config.brain_lobes_config[lobe.name]
             lobe.configure_new(lobe_config)
 
+
     def initialise_empty_lobes(self, config):
         if self.lobes != {}:
             raise Exception("Cannot overwrite an existing brain")
@@ -61,6 +63,10 @@ class BrainGenome(DefaultGenome):
         for lobe_name in config.brain_lobes_config.keys():
             lobe = self.create_lobe(lobe_name)
             self.lobes[lobe_name] = lobe
+
+    def create_lobe(self, name, connections = None, nodes = None):
+        return Lobe(name, connections, nodes)
+
 
     def configure_crossover(self, parent_brain_1, parent_brain_2, config):
         """ Configure a new genome by crossover from two parent genomes. """
@@ -94,34 +100,6 @@ class BrainGenome(DefaultGenome):
             lobe.mutate(lobe_config)
 
 
-    def mutate_add_node(self, config):
-        """ does something """
-        raise NotImplementedError()
-
-
-    def add_connection(self, config, input_key, output_key, weight, enabled):
-        """ does something """
-        raise NotImplementedError()
-
-
-    def mutate_add_connection(self, config):
-        """
-        Attempt to add a new connection, the only restriction being that the output
-        node cannot be one of the network input pins.
-        """
-        raise NotImplementedError()
-
-
-    def mutate_delete_node(self, config):
-        """ does something """
-        raise NotImplementedError()
-
-
-    def mutate_delete_connection(self):
-        """ does something """
-        raise NotImplementedError()
-
-
     def distance(self, other, config):
         """
         Returns the genetic distance between this genome and the other. This distance value
@@ -152,76 +130,40 @@ class BrainGenome(DefaultGenome):
 
 
     def __str__(self):
-        """ does something """
-        raise NotImplementedError()
+        """ Results a string representation of the brain object """
+        result = [ 
+            "Brain:",
+            "Key: {0}\nFitness: {1}\n".format(self.key, self.fitness),
+        ]
 
-
-    def create_lobe(self, name, connections = None, nodes = None):
-        return Lobe(name, connections, nodes)
+        for lobe in self.lobes.values():
+            result.append("Lobe: " + lobe.name)
+            result.append(str(lobe))
+        
+        return '\n'.join(result)
 
 
     @staticmethod
-    def create_node(config, node_id):
-        raise InvalidOperation("A node cannot be created at the brain level")
+    def create_connection(config, input_id, output_id): raise InvalidOperation("A connection cannot be created at the brain level")
+    def add_connection(self, config, input_key, output_key, weight, enabled): raise InvalidOperation("A connection cannot be created at the brain level")
+    def mutate_add_connection(self, config):    raise InvalidOperation("A connection cannot be created at the brain level")
+    def mutate_delete_connection(self):         raise InvalidOperation("A connection cannot be deleted at the brain level")
 
 
     @staticmethod
-    def create_connection(config, input_id, output_id):
-        raise InvalidOperation("A connection cannot be created at the brain level")
+    def create_node(config, node_id):           raise InvalidOperation("A node cannot be created at the brain level")
+    def mutate_add_node(self, config):          raise InvalidOperation("A node cannot be created at the brain level")
+    def mutate_delete_node(self, config):       raise InvalidOperation("A node cannot be deleted at the brain level")
 
 
-    def connect_fs_neat_nohidden(self, config):
-        """
-        Randomly connect one input to all output nodes
-        (FS-NEAT without connections to hidden, if any).
-        Originally connect_fs_neat.
-        """
-        raise NotImplementedError()
+    def compute_full_connections(self, config, direct):     raise NotImplementedError()
+    def connect_full_nodirect(self, config):        raise NotImplementedError()
+    def connect_full_direct(self, config):          raise NotImplementedError()
 
 
-    def connect_fs_neat_hidden(self, config):
-        """
-        Randomly connect one input to all hidden and output nodes
-        (FS-NEAT with connections to hidden, if any).
-        """
-        raise NotImplementedError()
+    def connect_partial_nodirect(self, config):     raise NotImplementedError()
+    def connect_partial_direct(self, config):       raise NotImplementedError()
 
 
-    def compute_full_connections(self, config, direct):
-        """
-        Compute connections for a fully-connected feed-forward genome--each
-        input connected to all hidden nodes
-        (and output nodes if ``direct`` is set or there are no hidden nodes),
-        each hidden node connected to all output nodes.
-        (Recurrent genomes will also include node self-connections.)
-        """
-        raise NotImplementedError()
-
-
-    def connect_full_nodirect(self, config):
-        """
-        Create a fully-connected genome
-        (except without direct input-output unless no hidden nodes).
-        """
-        raise NotImplementedError()
-
-
-    def connect_full_direct(self, config):
-        """ Create a fully-connected genome, including direct input-output connections. """
-        raise NotImplementedError()
-
-
-    def connect_partial_nodirect(self, config):
-        """
-        Create a partially-connected genome,
-        with (unless no hidden nodes) no direct input-output connections.
-        """
-        raise NotImplementedError()
-
-
-    def connect_partial_direct(self, config):
-        """
-        Create a partially-connected genome,
-        including (possibly) direct input-output connections.
-        """
-        raise NotImplementedError()
+    def connect_fs_neat_nohidden(self, config):     raise NotImplementedError()
+    def connect_fs_neat_hidden(self, config):       raise NotImplementedError()
