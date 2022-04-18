@@ -1,7 +1,7 @@
 class EmulatedBrain():
     """ 
       The EmulatedBrain class will efficiently load all of the lobes from the brain genome.
-      Note: for lobe name 'test', the property 'lobe_test' will become available on this object.
+      NOTE: for lobe name 'test', the property 'lobe_test' will become available on this object.
     """
     def __init__(self, genome, genome_config, neural_network_type, lobes):
         self.genome = genome
@@ -20,7 +20,7 @@ class EmulatedBrain():
 
     """ 
       Create a lobe instance (of the specified neural_network_type) from the genome and associated config
-      Note: will throw error if lobe is not found (intended)
+      NOTE: will throw error if lobe is not found (intended)
     """
     def create_lobe_instance(self, lobe_name):
         err_msg_prefix = "Tried lazy loading '" +  lobe_name + "' but was unable to "
