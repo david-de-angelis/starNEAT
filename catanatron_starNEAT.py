@@ -3,7 +3,7 @@ from __future__ import print_function
 import os
 import sys
 import neat
-import visualize
+import visualise.visualise as visualise
 
 from starNEAT.BrainGenome import BrainGenome
 from starNEAT.nn.FeedForward import FeedForward
@@ -96,25 +96,23 @@ class Experiment():
         if (self.lobe_build_settlement_config == None):
             self.lobe_build_settlement_config = genome_config.brain_lobes_config[Experiment.build_settlement_id]
 
+
     def wrap_up(self, best_genome):
-        # Display the winning genome.
-        print('\nBest genome:\n{!s}'.format(best_genome))
+      ## Display the winning genome.
+      # print('\nBest genome:\n{!s}'.format(best_genome))
 
-        # Show output of the most fit genome against training data.
-        print('\nOutput:')
-        winner_net = self.neural_network_type.create(best_genome, self.config)
-        for xi, xo in zip(xor_inputs, xor_outputs):
-            output = winner_net.activate(xi)
-            print("input {!r}, expected output {!r}, got {!r}".format(xi, xo, output))
+      # Show output of the most fit genome against training data.
+      print('\nOutput:')
+      self.formally_evaluate_best_genome(best_genome)
+      
+      # node_names = {-1:'A', -2: 'B', 0:'A XOR B'}
+      # visualise.draw_net(self.config, best_genome, True, node_names=node_names)
+      visualise.plot_stats(self.statistics_reporter, ylog=False, view=True)
+      visualise.plot_species(self.statistics_reporter, view=True)
 
-        node_names = {-1:'A', -2: 'B', 0:'A XOR B'}
-        visualize.draw_net(self.config, best_genome, True, node_names=node_names)
-        visualize.plot_stats(self.statistics_reporter, ylog=False, view=True)
-        visualize.plot_species(self.statistics_reporter, view=True)
-
-        population = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
-        population.run(self.evaluate_genomes, 10)
-
+      # # How to restore a population from a checkpoint:
+      # population = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
+      # population.run(self.evaluate_genomes, 10)
 
 if __name__ == '__main__':
   # Determine path to configuration file. This path manipulation is
