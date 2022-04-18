@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+import sys
 import neat
 import visualize
 
@@ -116,10 +117,11 @@ class Experiment():
 
 
 if __name__ == '__main__':
-    # Determine path to configuration file. This path manipulation is
-    # here so that the script will run successfully regardless of the
-    # current working directory.
+  # Determine path to configuration file. This path manipulation is
+  # here so that the script will run successfully regardless of the
+  # current working directory.
+  local_dir = os.path.dirname(__file__)
+  config_path = os.path.join(local_dir, 'config-feedforward')
 
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config-feedforward')
-    Experiment(config_path, 300).run()
+  epochs = int(sys.argv[1]) if len(sys.argv) > 1 else 20
+  Experiment(config_path, epochs).run()
