@@ -1,8 +1,8 @@
 from __future__ import print_function
 from catanatron.game import Color, Game
 from catanatron.models.player import RandomPlayer
-from catanatron.state_functions import player_key
 from starNEAT.starNEAT import starNEAT
+from custom_state_functions import get_fitness_from_game_state
 
 import os
 import sys
@@ -81,8 +81,8 @@ class Experiment(starNEAT):
 
     for i in range(num_games):
       game = self.play_game(brain, opponent_type)
-      # should maybe give an additional bonus if they are the actual winning_colour...
-      player_cumulative_fitness += self.get_fitness_from_game_state(game, Color.BLUE) #User's player should always be BLUE.
+      # should maybe give an additional bonus if they are the actual winning_color...
+      player_cumulative_fitness += get_fitness_from_game_state(game, Color.BLUE) #User's player should always be BLUE.
       if game.winning_color() == Color.BLUE:
         games_won += 1
       
@@ -102,19 +102,13 @@ class Experiment(starNEAT):
     random.shuffle(players)
 
     game = Game(players)
-    winning_colour = game.play()
+    winning_color = game.play()
 
-    #player_fitness = self.get_fitness_from_game_state(game, player.color)
-    #opponent_fitness = self.get_fitness_from_game_state(game, opponent.color)
+    #player_fitness = get_fitness_from_game_state(game, player.color)
+    #opponent_fitness = get_fitness_from_game_state(game, opponent.color)
 
-    # print("Winning colour:", winning_colour, "PLAYER FITNESS: ", player_fitness, "OPPONENT FITNESS: ", opponent_fitness)
+    # print("Winning color:", winning_color, "PLAYER FITNESS: ", player_fitness, "OPPONENT FITNESS: ", opponent_fitness)
     return game
-
-
-  @staticmethod
-  def get_fitness_from_game_state(game, colour):
-    key = player_key(game.state, colour)
-    return game.state.player_state[f"{key}_ACTUAL_VICTORY_POINTS"]
 
 
   def formally_evaluate_best_genome(self, best_genome):
