@@ -220,6 +220,163 @@ class TestCustomStateFunctions(unittest.TestCase):
       test.assertEqual(result[4], 0, "should not detect enemy cities")
       test.assertEqual(result[5], 0, "should not detect enemy settlements")
 
+      #Red perspective
+      result = csf.get_own_cities(game, Color.RED)
+      test.assertEqual(len(result), 54, "should be data for all 54 nodes")
+
+      test.assertEqual(result[0], 0, "should not detect enemy cities")
+      test.assertEqual(result[1], 0, "should not detect enemy settlements")
+      test.assertEqual(result[2], 1, "should have a city at this node")
+      test.assertEqual(result[3], 0, "should not detect settlements")
+      test.assertEqual(result[4], 0, "should not detect enemy cities")
+      test.assertEqual(result[5], 0, "should not detect enemy settlements")
+
+
+    def test_get_own_settlements(test):
+      game = dynObj()
+      game.state = dynObj()
+      game.state.board = dynObj()
+      game.state.board.buildings = { 
+        0: (Color.BLUE , BuildingType.CITY),
+        1: (Color.BLUE , BuildingType.SETTLEMENT),
+        2: (Color.RED  , BuildingType.CITY),
+        3: (Color.RED  , BuildingType.SETTLEMENT),
+        4: (Color.WHITE, BuildingType.CITY),
+        5: (Color.WHITE, BuildingType.SETTLEMENT),
+      }
+
+      #Blue perspective
+      result = csf.get_own_settlements(game, Color.BLUE)
+      test.assertEqual(len(result), 54, "should be data for all 54 nodes")
+
+      test.assertEqual(result[0], 0, "should not detect cities")
+      test.assertEqual(result[1], 1, "should have a settlement at this node")
+      test.assertEqual(result[2], 0, "should not detect enemy cities")
+      test.assertEqual(result[3], 0, "should not detect enemy settlements")
+      test.assertEqual(result[4], 0, "should not detect enemy cities")
+      test.assertEqual(result[5], 0, "should not detect enemy settlements")
+
+      #Red perspective
+      result = csf.get_own_settlements(game, Color.RED)
+      test.assertEqual(len(result), 54, "should be data for all 54 nodes")
+
+      test.assertEqual(result[0], 0, "should not detect enemy cities")
+      test.assertEqual(result[1], 0, "should not detect enemy settlements")
+      test.assertEqual(result[2], 0, "should not detect cities")
+      test.assertEqual(result[3], 1, "should have a settlement at this node")
+      test.assertEqual(result[4], 0, "should not detect enemy cities")
+      test.assertEqual(result[5], 0, "should not detect enemy settlements")
+
+    def test_get_all_settlement_allocation(test):
+      game = dynObj()
+      game.state = dynObj()
+      game.state.players = [Player(Color.BLUE), Player(Color.RED), Player(Color.WHITE)]
+      game.state.board = dynObj()
+      game.state.board.buildings = { 
+        0: (Color.BLUE , BuildingType.CITY),
+        1: (Color.BLUE , BuildingType.SETTLEMENT),
+        2: (Color.RED  , BuildingType.CITY),
+        3: (Color.RED  , BuildingType.SETTLEMENT),
+        4: (Color.WHITE, BuildingType.CITY),
+        5: (Color.WHITE, BuildingType.SETTLEMENT),
+      }
+
+      # Blue Perspective (should return blue results first)
+      result = csf.get_all_settlement_allocation(game, Color.BLUE)
+      test.assertEquals(len(result), 3)
+
+      #focus on blue results
+      focus = result[0]
+      test.assertEqual(len(focus), 54, "should be data for all 54 nodes")
+      
+      test.assertEqual(focus[0], 0, "should not detect cities")
+      test.assertEqual(focus[1], 1, "should have a settlement at this node")
+      test.assertEqual(focus[2], 0, "should not detect enemy cities")
+      test.assertEqual(focus[3], 0, "should not detect enemy settlements")
+      test.assertEqual(focus[4], 0, "should not detect enemy cities")
+      test.assertEqual(focus[5], 0, "should not detect enemy settlements")
+
+      #focus on red results
+      focus = result[1]
+      test.assertEqual(len(focus), 54, "should be data for all 54 nodes")
+      
+      test.assertEqual(focus[0], 0, "should not detect enemy cities")
+      test.assertEqual(focus[1], 0, "should not detect enemy settlements")
+      test.assertEqual(focus[2], 0, "should not detect cities")
+      test.assertEqual(focus[3], 1, "should have a settlement at this node")
+      test.assertEqual(focus[4], 0, "should not detect enemy cities")
+      test.assertEqual(focus[5], 0, "should not detect enemy settlements")
+
+    def test_get_all_city_allocation(test):
+      game = dynObj()
+      game.state = dynObj()
+      game.state.players = [Player(Color.BLUE), Player(Color.RED), Player(Color.WHITE)]
+      game.state.board = dynObj()
+      game.state.board.buildings = { 
+        0: (Color.BLUE , BuildingType.CITY),
+        1: (Color.BLUE , BuildingType.SETTLEMENT),
+        2: (Color.RED  , BuildingType.CITY),
+        3: (Color.RED  , BuildingType.SETTLEMENT),
+        4: (Color.WHITE, BuildingType.CITY),
+        5: (Color.WHITE, BuildingType.SETTLEMENT),
+      }
+
+      # Blue Perspective (should return blue results first)
+      result = csf.get_all_city_allocation(game, Color.BLUE)
+      test.assertEquals(len(result), 3)
+
+      #focus on blue results
+      focus = result[0]
+      test.assertEqual(len(focus), 54, "should be data for all 54 nodes")
+      
+      test.assertEqual(focus[0], 1, "should have a city at this node")
+      test.assertEqual(focus[1], 0, "should not detect settlements")
+      test.assertEqual(focus[2], 0, "should not detect enemy cities")
+      test.assertEqual(focus[3], 0, "should not detect enemy settlements")
+      test.assertEqual(focus[4], 0, "should not detect enemy cities")
+      test.assertEqual(focus[5], 0, "should not detect enemy settlements")
+
+    def test_get_enemy_city_allocation(test):
+      game = dynObj()
+      game.state = dynObj()
+      game.state.players = [Player(Color.BLUE), Player(Color.RED), Player(Color.WHITE)]
+      game.state.board = dynObj()
+      game.state.board.buildings = { 
+        0: (Color.BLUE , BuildingType.CITY),
+        1: (Color.BLUE , BuildingType.SETTLEMENT),
+        2: (Color.RED  , BuildingType.CITY),
+        3: (Color.RED  , BuildingType.SETTLEMENT),
+        4: (Color.WHITE, BuildingType.CITY),
+        5: (Color.WHITE, BuildingType.SETTLEMENT),
+      }
+
+      # Blue Perspective (should return blue results first)
+      result = csf.get_enemy_city_allocation(game, Color.BLUE)
+      test.assertEquals(len(result), 2)
+
+      #focus on red results
+      focus = result[0]
+      test.assertEqual(len(focus), 54, "should be data for all 54 nodes")
+      
+      test.assertEqual(focus[0], 0, "should not detect enemy cities")
+      test.assertEqual(focus[1], 0, "should not detect enemy settlements")
+      test.assertEqual(focus[2], 1, "should have a city at this node")
+      test.assertEqual(focus[3], 0, "should not detect settlements")
+      test.assertEqual(focus[4], 0, "should not detect enemy cities")
+      test.assertEqual(focus[5], 0, "should not detect enemy settlements")
+
+      #focus on white results
+      focus = result[1]
+      test.assertEqual(len(focus), 54, "should be data for all 54 nodes")
+      
+      test.assertEqual(focus[0], 0, "should not detect enemy cities")
+      test.assertEqual(focus[1], 0, "should not detect enemy settlements")
+      test.assertEqual(focus[2], 0, "should not detect enemy cities")
+      test.assertEqual(focus[3], 0, "should not detect enemy settlements")
+      test.assertEqual(focus[4], 1, "should have a city at this node")
+      test.assertEqual(focus[5], 0, "should not detect settlements")
+
+
 
     # def test_monthly_schedule(self):
     #     with patch('employee.requests.get') as mocked_get:
