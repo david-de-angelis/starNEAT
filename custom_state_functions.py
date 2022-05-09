@@ -64,10 +64,10 @@ def get_enemy_road_allocation(game: Game, color: Color):
       road_index = constants.road_tuple_to_index[road_position_tuple]
       all_enemies_road_allocation_dictionary[road_owned_by_color][road_index] = 1
 
-  # compress all_road_allocation dictionary to be a flat array - own roads should be laid out first
+  # compress all_road_allocation dictionary to be a flat array
   all_enemies_road_allocation = []
   for player_road_allocation_dictionary in all_enemies_road_allocation_dictionary.values():
-      all_enemies_road_allocation.append(list(player_road_allocation_dictionary.values()))
+      all_enemies_road_allocation.extend(list(player_road_allocation_dictionary.values()))
 
   return all_enemies_road_allocation
 
@@ -84,7 +84,7 @@ def get_trinary_building_ownership(game: Game, color: Color): # 0 for self-owned
 
   trinary_building_ownership = constants.all_buildings.copy() # copy established dictionary setting all roads to 0
   trinary_building_ownership.update(built_buildings) # overwrite any values for owned fields with 1 for self-owned, or -1 for enemy owned.
-  return trinary_building_ownership
+  return list(trinary_building_ownership.values())
 
 # Features: 54
 def get_own_settlements(game: Game, color: Color): # 0 for enemy owned or vacant, 1 for self-owned settlements
