@@ -15,7 +15,8 @@ class EmulatedBrain():
     """ create a lazy-loadable lobe cache (see in combination with __getattr_ func) """
     def init_lazy_loadable_lobes(self):
         for lobe in self.lobes:
-            setattr(self, "_lobe_" + lobe, None)
+            lobename = "_lobe_" + lobe
+            setattr(self, lobename, None)
 
 
     """ 
@@ -42,22 +43,19 @@ class EmulatedBrain():
 
     """  Supporting lazy-loaded variables, lobes are not actually loaded into memory unless they are called """
     def __getattr__(self, name):
-        global_dict = globals()
         lobe_prefix = "lobe_"
 
-        if (name.startsWith(lobe_prefix)):
+        if (name.startswith(lobe_prefix)):
           private_name = '_' + name
-          cached_value = global_dict[private_name]
+          cached_value = getattr(self, private_name, None)
 
-          if not bool(cached_value):
-            lazy_loaded_value = self.create_lobe_instance(name.lstrip(lobe_prefix))
-            global_dict[private_name] = lazy_loaded_value
+          if cached_value == None:
+            lobe_name = name[len(lobe_prefix):]
+            lazy_loaded_value = self.create_lobe_instance(lobe_name)
+            setattr(self, private_name, lazy_loaded_value)
             cached_value = lazy_loaded_value
 
           return cached_value
 
-        elif name in global_dict:
-          return global_dict[name] 
-
         else:
-          raise AttributeError(name)
+          return getattr(super, name)
