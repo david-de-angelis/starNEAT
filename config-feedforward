@@ -43,8 +43,8 @@ move_robber_node_delete_prob        = 0.2
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
 # network parameters
-build_city_num_inputs              = 2
-build_city_num_outputs             = 1
+build_city_num_inputs              = 152
+build_city_num_outputs             = 54
 build_city_num_hidden              = 5
 
 # connection enable options
@@ -99,8 +99,8 @@ build_road_node_delete_prob        = 0.2
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
 # network parameters
-build_settlement_num_inputs              = 2
-build_settlement_num_outputs             = 1
+build_settlement_num_inputs              = 336
+build_settlement_num_outputs             = 54
 build_settlement_num_hidden              = 5
 
 # connection enable options
