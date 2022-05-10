@@ -32,7 +32,10 @@ class MyBrain(EmulatedBrain):
         print(playable_actions)
         action_type = playable_action.action_type
         playable_action_types_seen[action_type] = True
-        action_skeleton = (action_type, playable_action.value)
+        if (action_type == ActionType.MOVE_ROBBER):
+          action_skeleton = (action_type, playable_action.value[0]) #We don't consider the player selection as part of the action-space.
+        else:
+          action_skeleton = (action_type, playable_action.value)
         action_id = constants.action_skeleton_to_action_id[action_skeleton]
         playable_actions_id_set.add(action_id)
       
@@ -84,6 +87,7 @@ class MyBrain(EmulatedBrain):
       playable_actions_id_set, playable_action_types_seen = self.generate_playable_actions_info(playable_actions)
       print(playable_action_types_seen)
 
+      # Look at generate_playable_actions(state) in catanatron.models.actions.py
       if (game.state.is_initial_build_phase): #probably put me last, since I'll only ever be needed once per game...
         if (game.state.current_prompt == ActionPrompt.BUILD_INITIAL_SETTLEMENT):
           action = self.build_settlement(game, playable_actions_id_set)

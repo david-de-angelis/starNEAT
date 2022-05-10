@@ -744,7 +744,7 @@ action_id_to_action_skeleton = {
 
 action_skeleton_to_action_id = {
   (ActionType.ROLL, None): 0,
-  (ActionType.MOVE_ROBBER, (0, 0, 0)): 1, #also have to take into account the player you want to steal from...
+  (ActionType.MOVE_ROBBER, (0, 0, 0)): 1, #also have to take into account the player you want to steal from... we don't know who has what resource though, so maybe just guess, or take from the highest scoring player...
   (ActionType.MOVE_ROBBER, (1, -1, 0)): 2,
   (ActionType.MOVE_ROBBER, (0, -1, 1)): 3,
   (ActionType.MOVE_ROBBER, (-1, 0, 1)): 4,
