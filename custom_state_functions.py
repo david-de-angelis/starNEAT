@@ -1,13 +1,15 @@
+import itertools
 from catanatron.game import Game, Color, Player
 from catanatron.state_functions import player_key
 from catanatron.models.enums import BuildingType, Action
 from catanatron.models.map import Tile
+
 import constants
 
 #region ### BANK ###
 
 # Features: 5
-def get_resources_array(game: Game):
+def get_bank_resources_array(game: Game):
   return game.state.resource_deck.array.tolist()
 
 #endregion
@@ -24,7 +26,7 @@ def get_trinary_road_ownership(game: Game, color: Color): # -1 = enemy road, 0 =
 
   trinary_road_ownership = constants.all_roads.copy() # copy established dictionary setting all roads to 0
   trinary_road_ownership.update(built_roads) # overwrite any values for owned fields with 1 for self-owned, or -1 for enemy owned.
-  return trinary_road_ownership
+  return list(trinary_road_ownership.values())
 
 # Features: 72 * N
 def get_all_road_allocation(game: Game, color: Color):
@@ -131,7 +133,7 @@ def get_all_settlement_allocation(game: Game, color: Color):
     else:
       all_players_settlement_allocation.append(list(player_settlement_allocation_dictionary.values()))
 
-  return all_players_settlement_allocation
+  return list(itertools.chain(*all_players_settlement_allocation))
 
 # Features: 54 * N
 def get_all_city_allocation(game: Game, color: Color):
@@ -147,14 +149,14 @@ def get_all_city_allocation(game: Game, color: Color):
       all_players_settlement_allocation_dictionary[building_owned_by_color][node_id] = 1
 
   # compress all_road_allocation dictionary to be a flat array - own roads should be laid out first
-  all_players_settlement_allocation = []
+  all_players_city_allocation = []
   for player_color, player_settlement_allocation_dictionary in all_players_settlement_allocation_dictionary.items():
     if player_color == color:
-      all_players_settlement_allocation.insert(0, list(player_settlement_allocation_dictionary.values())) #append to start
+      all_players_city_allocation.insert(0, list(player_settlement_allocation_dictionary.values())) #append to start
     else:
-      all_players_settlement_allocation.append(list(player_settlement_allocation_dictionary.values()))
+      all_players_city_allocation.append(list(player_settlement_allocation_dictionary.values()))
 
-  return all_players_settlement_allocation
+  return list(itertools.chain(*all_players_city_allocation))
 
 # Features: 54 * (N-1)
 def get_enemy_city_allocation(game: Game, color: Color):
