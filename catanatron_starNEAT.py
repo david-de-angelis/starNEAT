@@ -27,10 +27,10 @@ class Experiment(starNEAT):
     Return:
       best_genome (starNeat.BrainGenome.BrainGenome): the best genome in the evolved population
   """
-  def run(self):
+  def run(self, checkpoint = None):
     # Add execution reporters (monitors the execution throughout its lifetime)
     self.add_reporters()
-    best_genome = super().run()
+    best_genome = super().run(checkpoint)
     #perform post-run analysis
     self.wrap_up(best_genome)
     return best_genome
@@ -41,7 +41,7 @@ class Experiment(starNEAT):
     reporters = [
       neat.StdOutReporter(True),
       self.statistics_reporter,
-      neat.Checkpointer(5)
+      neat.Checkpointer(generation_interval=100, filename_prefix='checkpoints/starNEAT-checkpoint-')
     ]
 
     for reporter in reporters:
@@ -81,15 +81,13 @@ class Experiment(starNEAT):
 
     for i in range(num_games):
       game = self.play_game(brain, opponent_type)
-      # should maybe give an additional bonus if they are the actual winning_color...
-      player_cumulative_fitness += get_fitness_from_game_state(game, Color.BLUE) #User's player should always be BLUE.
+      # any value above 10 is effectively equal to 10 in the game of Catan, all are considered a win, none of which is better than the other.
+      player_cumulative_fitness += min(get_fitness_from_game_state(game, Color.BLUE), 10.0) #User's player should always be BLUE.
       if game.winning_color() == Color.BLUE:
         games_won += 1
       
 
-    # any value above 10 is effectively equal to 10 in the game of Catan, 
-    # all are considered a win, none of which is better than the other.
-    genome.fitness = min(player_cumulative_fitness / num_games, 10.0)
+    genome.fitness = player_cumulative_fitness / num_games
     return games_won
 
 
@@ -112,27 +110,26 @@ class Experiment(starNEAT):
 
 
   def formally_evaluate_best_genome(self, best_genome):
-    games_won = self.evaluate_genome(best_genome, self.config.genome_config, RandomPlayer, 10)
-    print("The best genome won", games_won, "games out of 10 against a RandomPlayer!")
+    games_won = self.evaluate_genome(best_genome, self.config.genome_config, RandomPlayer, 100)
+    print("The best genome won", games_won, "games out of 100 against a RandomPlayer!")
 
 
   def wrap_up(self, best_genome):
-    ## Display the winning genome.
-    # print('\nBest genome:\n{!s}'.format(best_genome))
-
     # Show output of the most fit genome against training data.
     print('\nOutput:')
     self.formally_evaluate_best_genome(best_genome)
-    
-    # node_names = {-1:'A', -2: 'B', 0:'A XOR B'}
-    # visualise.draw_net(self.config, best_genome, True, node_names=node_names)
-    visualise.plot_stats(self.statistics_reporter, ylog=False, view=True)
-    visualise.plot_species(self.statistics_reporter, view=True)
+    self.show_statistics()
 
-    # # How to restore a population from a checkpoint:
-    # population = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
-    # population.run(self.evaluate_genomes, 10)
+  def show_statistics(self):
+    try:
+      visualise.plot_stats(self.statistics_reporter, ylog=False, view=True)
+    except:
+       print("Failed to load 'plot_stats' visualisation...")
 
+    try:
+      visualise.plot_species(self.statistics_reporter, view=True)
+    except:
+      print("Failed to load 'plot_species' visualisation...")
 
 if __name__ == '__main__':
   # Determine path to configuration file. This path manipulation is
@@ -142,5 +139,12 @@ if __name__ == '__main__':
   config_path = os.path.join(local_dir, 'config-feedforward')
 
   epochs = int(sys.argv[1]) if len(sys.argv) > 1 else 20
-  Experiment(config_path, epochs).run()
+  checkpoint = "neat-checkpoint-349"
+  
+  print("Running", epochs, "epochs ", end="")
+  if (checkpoint != None):
+    print("on", checkpoint, end="")
+  print("...", checkpoint)
+  exit()
+  Experiment(config_path, epochs, checkpoint).run()
   
