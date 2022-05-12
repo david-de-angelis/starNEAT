@@ -24,9 +24,14 @@ class starNEAT():
     Return:
       type=BrainGenome: The genome of the best agent
   """
-  def run(self):
+  def run(self, checkpoint = None):
     # Execute the evaluation & evolution.
-    return self.population.run(self.evaluate_genomes, self.epochs)
+    if checkpoint == None:
+      population = self.population  
+    else:
+      print("Initialising population with checkpoint:", checkpoint)
+      population = neat.Checkpointer.restore_checkpoint(checkpoint)
+    return population.run(self.evaluate_genomes, self.epochs)
 
 
   def evaluate_genomes(self, genomes, global_config):
