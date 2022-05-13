@@ -425,6 +425,19 @@ all_buildings = {
   53: 0
 }
 
+action_type_id_to_action_type = {
+  0: ActionType.BUILD_ROAD,
+  1: ActionType.BUILD_SETTLEMENT,
+  2: ActionType.BUILD_CITY,
+  3: ActionType.BUY_DEVELOPMENT_CARD,
+  4: ActionType.PLAY_KNIGHT_CARD,
+  5: ActionType.PLAY_YEAR_OF_PLENTY,
+  6: ActionType.PLAY_ROAD_BUILDING,
+  7: ActionType.PLAY_MONOPOLY,
+  8: ActionType.MARITIME_TRADE,
+  9: ActionType.END_TURN
+}
+
 action_type_seen_template = {
   ActionType.ROLL: False,
   ActionType.MOVE_ROBBER: False,
@@ -456,6 +469,7 @@ action_type_offsets = {
   ActionType.MARITIME_TRADE: 229,
   ActionType.END_TURN: 289
 }
+
 action_id_to_action_skeleton = {
     0: (ActionType.ROLL, None),
     1: (ActionType.MOVE_ROBBER, (0, 0, 0)),
