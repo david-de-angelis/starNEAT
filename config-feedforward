@@ -40,34 +40,6 @@ move_robber_node_add_prob           = 0.2
 move_robber_node_delete_prob        = 0.2
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
-### ### ### ### ###   BUILD CITY LOBE   ### ### ### ### ###
-### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
-
-# network parameters
-build_city_num_inputs              = 152
-build_city_num_hidden              = 15
-build_city_num_outputs             = 54
-
-# connection enable options
-build_city_enabled_default         = True
-build_city_enabled_mutate_rate     = 0.01
-
-build_city_feed_forward            = True
-build_city_initial_connection      = full_nodirect
-
-# genome compatibility options
-build_city_compatibility_disjoint_coefficient = 1.0
-build_city_compatibility_weight_coefficient   = 0.5
-
-# connection add/remove rates
-build_city_conn_add_prob           = 0.5
-build_city_conn_delete_prob        = 0.5
-
-# node add/remove rates
-build_city_node_add_prob           = 0.2
-build_city_node_delete_prob        = 0.2
-
-### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###   BUILD ROAD LOBE   ### ### ### ### ###
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
@@ -122,6 +94,62 @@ build_settlement_conn_delete_prob        = 0.5
 # node add/remove rates
 build_settlement_node_add_prob           = 0.2
 build_settlement_node_delete_prob        = 0.2
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+### ### ### ### ###   BUILD CITY LOBE   ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# network parameters
+build_city_num_inputs              = 152
+build_city_num_hidden              = 15
+build_city_num_outputs             = 54
+
+# connection enable options
+build_city_enabled_default         = True
+build_city_enabled_mutate_rate     = 0.01
+
+build_city_feed_forward            = True
+build_city_initial_connection      = full_nodirect
+
+# genome compatibility options
+build_city_compatibility_disjoint_coefficient = 1.0
+build_city_compatibility_weight_coefficient   = 0.5
+
+# connection add/remove rates
+build_city_conn_add_prob           = 0.5
+build_city_conn_delete_prob        = 0.5
+
+# node add/remove rates
+build_city_node_add_prob           = 0.2
+build_city_node_delete_prob        = 0.2
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+### ### ### ### ###   DECIDE ACTION TYPE LOBE   ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# network parameters
+decide_action_type_num_inputs              = 609
+decide_action_type_num_hidden              = 61
+decide_action_type_num_outputs             = 10
+
+# connection enable options
+decide_action_type_enabled_default         = True
+decide_action_type_enabled_mutate_rate     = 0.01
+
+decide_action_type_feed_forward            = True
+decide_action_type_initial_connection      = full_nodirect
+
+# genome compatibility options
+decide_action_type_compatibility_disjoint_coefficient = 1.0
+decide_action_type_compatibility_weight_coefficient   = 0.5
+
+# connection add/remove rates
+decide_action_type_conn_add_prob           = 0.5
+decide_action_type_conn_delete_prob        = 0.5
+
+# node add/remove rates
+decide_action_type_node_add_prob           = 0.2
+decide_action_type_node_delete_prob        = 0.2
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###       DEFAULT       ### ### ### ### ###
