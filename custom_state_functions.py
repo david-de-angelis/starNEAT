@@ -1,3 +1,5 @@
+# NOTE: descriptive text for functions was sourced from https://catanatron.readthedocs.io/en/latest/catanatron_gym.envs.html
+
 import itertools
 from catanatron.game import Game, Color, Player
 from catanatron.state_functions import player_key
@@ -8,9 +10,16 @@ import constants
 
 #region ### BANK ###
 
+# Number of cards of that resource in bank
 # Features: 5
 def get_bank_resources_array(game: Game):
   return game.state.resource_deck.array.tolist()
+
+# Number of development cards in bank
+# Features: 1
+def get_bank_development_cards_count(game: Game):
+  development_deck_resource_count = game.state.development_deck.array.tolist()
+  return [sum(development_deck_resource_count)]
 
 #endregion
 
@@ -28,6 +37,7 @@ def get_trinary_road_ownership(game: Game, color: Color): # -1 = enemy road, 0 =
   trinary_road_ownership.update(built_roads) # overwrite any values for owned fields with 1 for self-owned, or -1 for enemy owned.
   return list(trinary_road_ownership.values())
 
+# Whether edge (road) i is owned by player j
 # Features: 72 * N
 def get_all_road_allocation(game: Game, color: Color):
   # initialise all players with 0 (false) for road ownership
@@ -49,7 +59,7 @@ def get_all_road_allocation(game: Game, color: Color):
     else:
       all_players_road_allocation.append(list(player_road_allocation_dictionary.values()))
 
-  return all_players_road_allocation
+  return list(itertools.chain(*all_players_road_allocation))
 
 
 def get_enemy_road_allocation(game: Game, color: Color):
@@ -112,6 +122,7 @@ def get_own_cities(game: Game, color: Color): # 0 for enemy owned or vacant, 1 f
   city_ownership.update(built_cities) # overwrite any values for owned fields with 1 for self-owned, or -1 for enemy owned.
   return city_ownership
 
+# Whether player j has a city in node i
 # Features: 54 * N
 def get_all_settlement_allocation(game: Game, color: Color):
   # initialise all players with 0 (false) for road ownership
@@ -135,6 +146,7 @@ def get_all_settlement_allocation(game: Game, color: Color):
 
   return list(itertools.chain(*all_players_settlement_allocation))
 
+# Whether player j has a city in node i
 # Features: 54 * N
 def get_all_city_allocation(game: Game, color: Color):
    # initialise all players with 0 (false) for road ownership
@@ -183,6 +195,7 @@ def get_enemy_city_allocation(game: Game, color: Color):
 
 #region ### PORT ###
 
+# Whether node i is port of resource (or THREE_TO_ONE).
 # Features: 54
 def get_port_resource_allocation(game: Game):
   portsList = list(game.state.board.map.ports_by_id.values())
@@ -203,6 +216,7 @@ def get_port_resource_allocation(game: Game):
 
 #region ### TILE ###
 
+# Whether robber is on tile i.
 # Features: 19
 def get_tile_robber_allocation(game: Game):
   robber_coordinates = game.state.board.robber_coordinate
@@ -214,6 +228,7 @@ def get_tile_robber_allocation(game: Game):
   assert len(tile_robber_allocation) == 19
   return tile_robber_allocation
 
+# Whether tile i yields resource (or DESERT).
 # Features: 114
 def get_tile_resource_allocation(game: Game):
   tile_resource_allocation = []
@@ -228,6 +243,7 @@ def get_tile_resource_allocation(game: Game):
   assert len(tile_resource_allocation) == 114
   return tile_resource_allocation
 
+# Tile i’s probability of being rolled.
 # Features: 19
 def get_tile_probabilities(game: Game):
   tile_probabilities = []
@@ -239,36 +255,7 @@ def get_tile_probabilities(game: Game):
 
 #region ### PLAYER ###
 
-## Illegal - should not be able to view other players resources...
-# # Features: 5N
-# def get_all_player_resources(game: Game, color: Color): #Make sure own color first
-#   all_player_resources_dictionary = {}
-#   ps = game.state.player_state
-#   for player in game.state.players:
-#     player_index = game.state.color_to_index[player.color]
-#     prefix = "P" + str(player_index) + "_"
-#     player_resource_array = [
-#       ps[prefix + "WOOD_IN_HAND"],
-#       ps[prefix + "BRICK_IN_HAND"],
-#       ps[prefix + "SHEEP_IN_HAND"],
-#       ps[prefix + "WHEAT_IN_HAND"],
-#       ps[prefix + "ORE_IN_HAND"],
-#     ]
-#     all_player_resources_dictionary[player_index] = player_resource_array
-
-#   all_player_resources_array = []
-#   current_player_index = game.state.color_to_index[color]
-#   all_player_resources_array.extend(all_player_resources_dictionary[current_player_index])
-#
-#   # use get_flat_array_from_all_player_index_dictionary instead
-#   for player_index, player_resources in all_player_resources_dictionary.items():
-#     if (player_index == current_player_index):
-#       continue
-#     else:
-#       all_player_resources_array.extend(player_resources)
-
-#   return all_player_resources_array
-
+# Number of each resource cards in hand
 # Features: 5N
 def get_own_resources(game: Game, color: Color): #Make sure own color first
   current_player_index = game.state.color_to_index[color]
@@ -285,6 +272,20 @@ def get_own_resources(game: Game, color: Color): #Make sure own color first
 
   return player_resource_array
 
+# Number of hidden resource cards player i has
+# Features: N
+def get_all_players_resource_count(game: Game, color: Color): #Make sure own color first
+  all_player_array = [sum(get_own_resources(game, color))]
+
+  for player_color in game.state.colors:
+    if (player_color == color):
+      continue #was already added earlier as the base of the array...
+    else:
+      all_player_array.append(sum(get_own_resources(game, player_color)))
+
+  return all_player_array
+
+# Number of dev-card cards in hand
 # Features: 5
 def get_own_development_cards(game: Game, color: Color):
   current_player_index = game.state.color_to_index[color]
@@ -301,74 +302,58 @@ def get_own_development_cards(game: Game, color: Color):
 
   return player_development_card_array
 
+# Number of hidden development cards player i has
 # Features: N
-def get_longest_road_trophy_allocation(game: Game, color: Color): #Make sure own color first
-  return get_player_state_statistics(game, color, ["HAS_ROAD"])
-  # all_player_roads_dictionary = {}
-  # ps = game.state.player_state
-  # for player in game.state.players:
-  #   player_index = game.state.color_to_index[player.color]
-  #   prefix = "P" + str(player_index) + "_"
-  #   player_has_longest_road_array = [
-  #     ps[prefix + "HAS_ROAD"],
-  #   ]
-  #   all_player_roads_dictionary[player_index] = player_has_longest_road_array
+def get_all_players_development_cards_count(game: Game, color: Color): #Make sure own color first
+  all_player_array = [sum(get_own_development_cards(game, color))]
 
-  # all_player_roads_array = get_flat_array_from_all_player_index_dictionary(game, color, all_player_roads_dictionary)
-  # return all_player_roads_array
+  for player_color in game.state.colors:
+    if (player_color == color):
+      continue #was already added earlier as the base of the array...
+    else:
+      all_player_array.append(sum(get_own_development_cards(game, player_color)))
 
+  return all_player_array
+
+# Whether player <i> has Longest Road
 # Features: N
-def get_all_player_roads_left(game: Game, color: Color): #Make sure own color first
+def get_longest_road_trophy_allocation(game: Game, color: Color):
+  results = get_player_state_statistics(game, color, ["HAS_ROAD"])
+  for i in range(len(results)):
+    results[i] = 1 if results[i] else 0
+
+  return results
+
+# Whether player <i> has Largest Army
+# Features: N
+def get_largest_army_trophy_allocation(game: Game, color: Color):
+  results = get_player_state_statistics(game, color, ["HAS_ARMY"])
+  for i in range(len(results)):
+    results[i] = results[i] = 1 if results[i] else 0
+
+  return results
+
+# Number of roads pieces player i has outside of board (left to build)
+# Features: N
+def get_all_player_roads_left(game: Game, color: Color):
   return get_player_state_statistics(game, color, ["ROADS_AVAILABLE"])
-  # all_player_roads_left_dictionary = {}
-  # ps = game.state.player_state
-  # for player in game.state.players:
-  #   player_index = game.state.color_to_index[player.color]
-  #   prefix = "P" + str(player_index) + "_"
-  #   player_roads_left_array = [
-  #     ps[prefix + "ROADS_AVAILABLE"],
-  #   ]
-  #   all_player_roads_left_dictionary[player_index] = player_roads_left_array
 
-  # all_player_roads_left_array = get_flat_array_from_all_player_index_dictionary(game, color, all_player_roads_left_dictionary)
-  # return all_player_roads_left_array
-
+# Number of settlements player i has outside of board (left to build)
 # Features: N
-def get_all_player_settlements_left(game: Game, color: Color): #Make sure own color first
+def get_all_player_settlements_left(game: Game, color: Color):
   return get_player_state_statistics(game, color, ["SETTLEMENTS_AVAILABLE"])
-  # all_player_settlements_left_dictionary = {}
-  # ps = game.state.player_state
-  # for player in game.state.players:
-  #   player_index = game.state.color_to_index[player.color]
-  #   prefix = "P" + str(player_index) + "_"
-  #   player_settlements_left_array = [
-  #     ps[prefix + "SETTLEMENTS_AVAILABLE"],
-  #   ]
-  #   all_player_settlements_left_dictionary[player_index] = player_settlements_left_array
 
-  # all_player_settlements_left_array = get_flat_array_from_all_player_index_dictionary(game, color, all_player_settlements_left_dictionary)
-  # return all_player_settlements_left_array
-
+#Number of cities player i has outside of board (left to build)
 # Features: N
-def get_all_player_cities_left(game: Game, color: Color): #Make sure own color first
+def get_all_player_cities_left(game: Game, color: Color):
   return get_player_state_statistics(game, color, ["CITIES_AVAILABLE"])
-  # all_player_cities_left_dictionary = {}
-  # ps = game.state.player_state
-  # for player in game.state.players:
-  #   player_index = game.state.color_to_index[player.color]
-  #   prefix = "P" + str(player_index) + "_"
-  #   player_cities_left_array = [
-  #     ps[prefix + "CITIES_AVAILABLE"],
-  #   ]
-  #   all_player_cities_left_dictionary[player_index] = player_cities_left_array
 
-  # all_player_cities_left_array = get_flat_array_from_all_player_index_dictionary(game, color, all_player_cities_left_dictionary)
-  # return all_player_cities_left_array
-
+# Whether player <i> has Longest Road
 # Features: N
-def get_all_player_longest_road_length(game: Game, color: Color): #Make sure own color first
+def get_all_player_longest_road_length(game: Game, color: Color):
   return get_player_state_statistics(game, color, ["LONGEST_ROAD_LENGTH"])
 
+# Total Victory Points (including Victory Point Development Cards)
 # Features: 1
 def get_own_actual_victory_points(game: Game, color: Color):
   current_player_index = game.state.color_to_index[color]
@@ -381,12 +366,15 @@ def get_own_actual_victory_points(game: Game, color: Color):
 
   return player_own_actual_victory_points_array
 
+# Amount of visible victory points for player i (i.e. doesn’t include hidden victory point cards; only army, road and settlements/cities).
 # Features: N
 def get_all_public_victory_points(game: Game, color: Color): #Make sure own color first
   return get_player_state_statistics(game, color, ["VICTORY_POINTS"])
 
+# Amount of dev-card cards player i has played in game (VICTORY_POINT not included).
+# Features: 4N
 def get_all_player_development_card_played(game: Game, color: Color): #Make sure own color first
-  return get_player_state_statistics(game, color, ["PLAYED_KNIGHT", "PLAYED_YEAR_OF_PLENTY", "PLAYED_MONOPOLY", "PLAYED_ROAD_BUILDING", "PLAYED_VICTORY_POINT"])
+  return get_player_state_statistics(game, color, ["PLAYED_KNIGHT", "PLAYED_YEAR_OF_PLENTY", "PLAYED_MONOPOLY", "PLAYED_ROAD_BUILDING"]) #(VICTORY_POINT not included)
 
 #endregion
 
@@ -406,13 +394,13 @@ def get_resource_type(resource):
 def get_action_from_action_skeleton(color: Color, action_skeleton):
   return Action(color, action_skeleton[0], action_skeleton[1])
 
-def get_flat_array_from_all_player_index_dictionary(game: Game,  color: Color, all_player_dictionary):
+def get_flat_array_from_all_player_index_dictionary(game: Game,  color: Color, all_player_dictionary): #Make sure own color first
   current_player_index = game.state.color_to_index[color]
   all_player_array = all_player_dictionary[current_player_index]
 
   for player_index, player_resources in all_player_dictionary.items():
     if (player_index == current_player_index):
-      continue
+      continue #was already added earlier as the base of the array...
     else:
       all_player_array.extend(player_resources)
 
