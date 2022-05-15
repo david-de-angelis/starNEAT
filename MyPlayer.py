@@ -1,5 +1,6 @@
 import itertools
 import random
+import time
 from typing import Iterable
 from catanatron.game import Action, Color, Game, Player
 from catanatron.models.enums import ActionPrompt, ActionType, Action
@@ -63,7 +64,7 @@ class MyBrain(EmulatedBrain):
       output_dictionary = {index: element for index, element in enumerate(output_array)} # map each value to its index in the array
       for index in sorted(output_dictionary, key=output_dictionary.get, reverse=True): # enumerate over the array by grabbing the key/index of the entries with the highest 'value' first
         action_type_id = index
-        action_type = constants.action_type_id_to_action_type[action_type_id]
+        action_type = constants.play_turn_action_types[action_type_id]
         if (playable_action_types_dictionary[action_type]):
           return action_type
 
@@ -128,11 +129,14 @@ class MyBrain(EmulatedBrain):
         case ActionPrompt.MOVE_ROBBER:
           return self.move_robber(game, playable_actions_id_set, playable_actions)
         case ActionPrompt.PLAY_TURN:
-          return self.play_turn(game, playable_actions_id_set, playable_action_types_seen)
+          action = self.play_turn(game, playable_actions_id_set, playable_action_types_seen)
+          return action
         case ActionPrompt.DISCARD:
           raise Exception("This can't occur, as it would have been addressed as the only option earlier.")
         case _:
           raise Exception("Unknown ActionPrompt", game.state.current_prompt, playable_actions)
+      
+      raise Exception("Did not return any value...", game.state.current_prompt, num_playable_actions, playable_actions)
 
 
     def play_turn(self, game, playable_actions_id_set, playable_action_types_seen):
@@ -146,39 +150,41 @@ class MyBrain(EmulatedBrain):
           case ActionType.BUILD_SETTLEMENT:
             return self.build_settlement(game, playable_actions_id_set)
           case ActionType.BUILD_CITY:
-            raise NotImplementedError() # ❌ lobe_build_city
+            return self.build_city(game, playable_actions_id_set)
           case ActionType.BUY_DEVELOPMENT_CARD:
             return self.buy_development_card()
           case ActionType.PLAY_KNIGHT_CARD:
             return self.play_knight_card()
           case ActionType.PLAY_YEAR_OF_PLENTY:
-            raise NotImplementedError() # ❌ lobe_play_year_of_plenty
+            return self.play_year_of_plenty(game, playable_actions_id_set)
           case ActionType.PLAY_ROAD_BUILDING:
-            self.play_road_building()
+            return self.play_road_building()
           case ActionType.PLAY_MONOPOLY:
-            raise NotImplementedError() # ❌ lobe_play_monopoly 
+            return self.play_monopoly(game, playable_actions_id_set)
           case ActionType.MARITIME_TRADE:
-            raise NotImplementedError() # ❌ lobe_maritime_trade
+            return self.maritime_trade(game, playable_actions_id_set)
           case ActionType.END_TURN:
             return self.end_turn()
           case _:
             raise Exception("Unknown ActionType", action_type, playable_actions_id_set)
 
 
-    def build_settlement(self, game: Game, playable_actions_id_set):
+    def move_robber(self, game: Game, playable_actions_id_set, playable_actions):
       #building appropriate input for the lobe
-      input_enemy_road_allocation = custom_state_functions.get_enemy_road_allocation(game, self.color)
-      input_trinary_building_ownership = custom_state_functions.get_trinary_building_ownership(game, self.color)
-      input_port_resource_allocation = custom_state_functions.get_port_resource_allocation(game)
-      input_tile_robber_allocation = custom_state_functions.get_tile_robber_allocation(game)
-      input_tile_resource_allocation = custom_state_functions.get_tile_resource_allocation(game)
+      input_bank_resources_array = custom_state_functions.get_bank_resources_array(game)
+      input_trinary_settlement_ownership = custom_state_functions.get_trinary_settlement_ownership(game, self.color)
+      input_trinary_city_ownership = custom_state_functions.get_trinary_city_ownership(game, self.color)
+      input_tile_resource_allocation_strict = custom_state_functions.get_tile_resource_allocation_strict(game)
       input_tile_probabilities = custom_state_functions.get_tile_probabilities(game)
-      input_longest_road_trophy_allocation = custom_state_functions.get_longest_road_trophy_allocation(game, self.color)
-      input_all_player_longest_road_length = custom_state_functions.get_all_player_longest_road_length(game, self.color)
+      input_own_actual_victory_points = custom_state_functions.get_own_actual_victory_points(game, self.color)
+      input_own_resources = custom_state_functions.get_own_resources(game, self.color)
+      input_own_development_cards = custom_state_functions.get_own_development_cards(game, self.color)
+      input_all_public_victory_points = custom_state_functions.get_all_public_victory_points(game, self.color)
 
-      input = list(itertools.chain(input_enemy_road_allocation, input_trinary_building_ownership, input_port_resource_allocation, input_tile_robber_allocation, input_tile_resource_allocation, input_tile_probabilities, input_longest_road_trophy_allocation, input_all_player_longest_road_length))
-      output = self.lobe_build_settlement.activate(input)
-      action = self.get_best_valid_action(output, ActionType.BUILD_SETTLEMENT, playable_actions_id_set)
+      input = list(itertools.chain(input_bank_resources_array, input_trinary_settlement_ownership, input_trinary_city_ownership, input_tile_resource_allocation_strict, input_tile_probabilities, input_own_actual_victory_points, input_own_resources, input_own_development_cards, input_all_public_victory_points))
+      output = self.lobe_move_robber.activate(input)
+      unhydrated_action = self.get_best_valid_action(output, ActionType.MOVE_ROBBER, playable_actions_id_set)
+      action = self.hydrate_move_robber_action(playable_actions, unhydrated_action)
       return action
 
 
@@ -187,38 +193,114 @@ class MyBrain(EmulatedBrain):
       input_trinary_road_ownership = custom_state_functions.get_trinary_road_ownership(game, self.color)
       input_trinary_building_ownership = custom_state_functions.get_trinary_building_ownership(game, self.color)
       input_own_actual_victory_points = custom_state_functions.get_own_actual_victory_points(game, self.color)
+      input_own_road_building_development_card_count = custom_state_functions.get_own_road_building_development_card_count(game, self.color)
       input_longest_road_trophy_allocation = custom_state_functions.get_longest_road_trophy_allocation(game, self.color)
       input_all_player_roads_left = custom_state_functions.get_all_player_roads_left(game, self.color)
       input_all_player_settlements_left = custom_state_functions.get_all_player_settlements_left(game, self.color)
-      input_all_player_cities_left = custom_state_functions.get_all_player_cities_left(game, self.color)
       input_all_player_longest_road_length = custom_state_functions.get_all_player_longest_road_length(game, self.color)
+      input_all_road_building_development_card_played_count = custom_state_functions.get_all_road_building_development_card_played_count(game, self.color)
 
-      input = list(itertools.chain(input_trinary_road_ownership, input_trinary_building_ownership, input_own_actual_victory_points, input_longest_road_trophy_allocation, input_all_player_roads_left, input_all_player_settlements_left, input_all_player_cities_left, input_all_player_longest_road_length))
+      input = list(itertools.chain(input_trinary_road_ownership, input_trinary_building_ownership, input_own_actual_victory_points, input_own_road_building_development_card_count, input_longest_road_trophy_allocation, input_all_player_roads_left, input_all_player_settlements_left, input_all_player_longest_road_length, input_all_road_building_development_card_played_count))
       output = self.lobe_build_road.activate(input)
       action = self.get_best_valid_action(output, ActionType.BUILD_ROAD, playable_actions_id_set)
       return action
 
 
-    def move_robber(self, game: Game, playable_actions_id_set, playable_actions):
+    def build_settlement(self, game: Game, playable_actions_id_set):
       #building appropriate input for the lobe
       input_bank_resources_array = custom_state_functions.get_bank_resources_array(game)
-      input_all_settlement_allocation = custom_state_functions.get_all_settlement_allocation(game, self.color)
-      input_all_city_allocation = custom_state_functions.get_all_city_allocation(game, self.color)
-      input_tile_resource_allocation = custom_state_functions.get_tile_resource_allocation(game)
+      input_enemy_road_allocation = custom_state_functions.get_enemy_road_allocation(game, self.color)
+      input_trinary_building_ownership = custom_state_functions.get_trinary_building_ownership(game, self.color)
+      input_port_resource_allocation = custom_state_functions.get_port_resource_allocation(game)
+      input_tile_resource_allocation_strict = custom_state_functions.get_tile_resource_allocation_strict(game)
       input_tile_probabilities = custom_state_functions.get_tile_probabilities(game)
       input_own_actual_victory_points = custom_state_functions.get_own_actual_victory_points(game, self.color)
       input_own_resources = custom_state_functions.get_own_resources(game, self.color)
       input_own_development_cards = custom_state_functions.get_own_development_cards(game, self.color)
+      input_longest_road_trophy_allocation = custom_state_functions.get_longest_road_trophy_allocation(game, self.color)
+      input_all_player_longest_road_length = custom_state_functions.get_all_player_longest_road_length(game, self.color)
       input_all_public_victory_points = custom_state_functions.get_all_public_victory_points(game, self.color)
 
-      input = list(itertools.chain(input_bank_resources_array, input_all_settlement_allocation, input_all_city_allocation, input_tile_resource_allocation, input_tile_probabilities, input_own_actual_victory_points, input_own_resources, input_own_development_cards, input_all_public_victory_points))
-      output = self.lobe_move_robber.activate(input)
-      unhydrated_action = self.get_best_valid_action(output, ActionType.MOVE_ROBBER, playable_actions_id_set)
-      action = self.hydrate_move_robber_action(playable_actions, unhydrated_action)
+      input = list(itertools.chain(input_bank_resources_array, input_enemy_road_allocation, input_trinary_building_ownership, input_port_resource_allocation, input_tile_resource_allocation_strict, input_tile_probabilities, input_own_actual_victory_points, input_own_resources, input_own_development_cards, input_longest_road_trophy_allocation, input_all_player_longest_road_length, input_all_public_victory_points))
+      output = self.lobe_build_settlement.activate(input)
+      action = self.get_best_valid_action(output, ActionType.BUILD_SETTLEMENT, playable_actions_id_set)
+      return action
+
+
+    def build_city(self, game: Game, playable_actions_id_set):
+      #building appropriate input for the lobe
+      input_bank_resources_array = custom_state_functions.get_bank_resources_array(game)
+      input_trinary_building_ownership = custom_state_functions.get_trinary_building_ownership(game, self.color)
+      input_tile_resource_allocation_strict = custom_state_functions.get_tile_resource_allocation_strict(game)
+      input_tile_probabilities = custom_state_functions.get_tile_probabilities(game)
+      input_own_actual_victory_points = custom_state_functions.get_own_actual_victory_points(game, self.color)
+      input_own_resources = custom_state_functions.get_own_resources(game, self.color)
+      input_own_development_cards = custom_state_functions.get_own_development_cards(game, self.color)
+
+      input = list(itertools.chain(input_bank_resources_array, input_trinary_building_ownership, input_tile_resource_allocation_strict, input_tile_probabilities, input_own_actual_victory_points, input_own_resources, input_own_development_cards))
+      output = self.lobe_build_city.activate(input)
+      action = self.get_best_valid_action(output, ActionType.BUILD_CITY, playable_actions_id_set)
+      return action
+
+
+    def play_year_of_plenty(self, game: Game, playable_actions_id_set):
+      #building appropriate input for the lobe
+      input_bank_resources_array = custom_state_functions.get_bank_resources_array(game)
+      input_own_resource_trade_opportunities = custom_state_functions.get_own_resource_trade_opportunities(game, self.color)
+      input_own_resource_income_opportunities = custom_state_functions.get_own_resource_income_opportunities(game, self.color)
+      input_own_actual_victory_points = custom_state_functions.get_own_actual_victory_points(game, self.color)
+      input_own_resources = custom_state_functions.get_own_resources(game, self.color)
+      input_own_development_cards = custom_state_functions.get_own_development_cards(game, self.color)
+
+      input = list(itertools.chain(input_bank_resources_array, input_own_resource_trade_opportunities, input_own_resource_income_opportunities, input_own_actual_victory_points, input_own_resources, input_own_development_cards))
+      output = self.lobe_play_year_of_plenty.activate(input)
+      action = self.get_best_valid_action(output, ActionType.PLAY_YEAR_OF_PLENTY, playable_actions_id_set)
+      return action
+
+
+    def play_monopoly(self, game: Game, playable_actions_id_set):
+      #building appropriate input for the lobe
+      input_bank_resources_array = custom_state_functions.get_bank_resources_array(game)
+      input_all_resource_trade_opportunities = custom_state_functions.get_all_resource_trade_opportunities(game, self.color)
+      input_all_resource_income_opportunities = custom_state_functions.get_all_resource_income_opportunities(game, self.color)
+      input_own_actual_victory_points = custom_state_functions.get_own_actual_victory_points(game, self.color)
+      input_own_resources = custom_state_functions.get_own_resources(game, self.color)
+      input_own_development_cards = custom_state_functions.get_own_development_cards(game, self.color)
+      input_all_players_resource_count = custom_state_functions.get_all_players_resource_count(game, self.color)
+
+      input = list(itertools.chain(input_bank_resources_array, input_all_resource_trade_opportunities, input_all_resource_income_opportunities, input_own_actual_victory_points, input_own_resources, input_own_development_cards, input_all_players_resource_count))
+      output = self.lobe_play_monopoly.activate(input)
+      action = self.get_best_valid_action(output, ActionType.PLAY_MONOPOLY, playable_actions_id_set)
+      return action
+
+
+    def maritime_trade(self, game: Game, playable_actions_id_set):
+      #building appropriate input for the lobe
+      input_bank_resources_array = custom_state_functions.get_bank_resources_array(game)
+      input_own_resource_trade_opportunities = custom_state_functions.get_own_resource_trade_opportunities(game, self.color)
+      input_own_resource_income_opportunities = custom_state_functions.get_own_resource_income_opportunities(game, self.color)
+      input_own_actual_victory_points = custom_state_functions.get_own_actual_victory_points(game, self.color)
+      input_own_resources = custom_state_functions.get_own_resources(game, self.color)
+      input_own_development_cards = custom_state_functions.get_own_development_cards(game, self.color)
+      input_longest_road_trophy_allocation = custom_state_functions.get_longest_road_trophy_allocation(game, self.color)
+      input_all_player_roads_left = custom_state_functions.get_all_player_roads_left(game, self.color)
+      input_all_player_settlements_left = custom_state_functions.get_all_player_settlements_left(game, self.color)
+      input_all_player_cities_left = custom_state_functions.get_all_player_cities_left(game, self.color)
+      input_all_player_longest_road_length = custom_state_functions.get_all_player_longest_road_length(game, self.color)
+      input_all_public_victory_points = custom_state_functions.get_all_public_victory_points(game, self.color)
+
+      input = list(itertools.chain(input_bank_resources_array, input_own_resource_trade_opportunities, input_own_resource_income_opportunities, input_own_actual_victory_points, input_own_resources, input_own_development_cards, input_longest_road_trophy_allocation, input_all_player_roads_left, input_all_player_settlements_left, input_all_player_cities_left, input_all_player_longest_road_length, input_all_public_victory_points))
+      output = self.lobe_maritime_trade.activate(input)
+      action = self.get_best_valid_action(output, ActionType.MARITIME_TRADE, playable_actions_id_set)
       return action
 
 
     def decide_action_type(self, game: Game, playable_action_types_seen):
+      odds = [0.99, 0.89, 0.79, 0.69, 0.59, 0.49, 0.39, 0.29, 0.19, 0.09]
+      random.shuffle(odds)
+      action_type = self.get_best_valid_action_type(odds, playable_action_types_seen)
+      return action_type
+
       input_resources_array = custom_state_functions.get_bank_resources_array(game)
       input_bank_development_cards_count = custom_state_functions.get_bank_development_cards_count(game)
       input_all_road_allocation = custom_state_functions.get_all_road_allocation(game, self.color)
@@ -247,14 +329,22 @@ class MyBrain(EmulatedBrain):
       action_type = self.get_best_valid_action_type(output, playable_action_types_seen)
       return action_type
 
-    def buy_development_card():
-      return (ActionType.BUY_DEVELOPMENT_CARD, None)
 
-    def play_knight_card():
-      return (ActionType.PLAY_KNIGHT_CARD, None)
+    def buy_development_card(self):
+      action_skeleton = (ActionType.BUY_DEVELOPMENT_CARD, None)
+      return custom_state_functions.get_action_from_action_skeleton(self.color, action_skeleton)
+
+
+    def play_knight_card(self):
+      action_skeleton = (ActionType.PLAY_KNIGHT_CARD, None)
+      return custom_state_functions.get_action_from_action_skeleton(self.color, action_skeleton)
     
-    def play_road_building():
-      return (ActionType.PLAY_ROAD_BUILDING, None)
 
-    def end_turn():
-      return (ActionType.END_TURN, None)
+    def play_road_building(self):
+      action_skeleton = (ActionType.PLAY_ROAD_BUILDING, None)
+      return custom_state_functions.get_action_from_action_skeleton(self.color, action_skeleton)
+
+
+    def end_turn(self):
+      action_skeleton = (ActionType.END_TURN, None)
+      return custom_state_functions.get_action_from_action_skeleton(self.color, action_skeleton)
