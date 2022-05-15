@@ -8,7 +8,7 @@ reset_on_extinction   = False
 [BrainGenome]
 
 #NEW GLOBAL FIELDS:
-brain_lobes           = move_robber build_city build_road build_settlement
+brain_lobes           = move_robber build_road build_settlement build_city play_year_of_plenty play_monopoly maritime_trade
 
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
@@ -16,8 +16,8 @@ brain_lobes           = move_robber build_city build_road build_settlement
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
 # network parameters
-move_robber_num_inputs              = 367
-move_robber_num_hidden              = 37
+move_robber_num_inputs              = 240
+move_robber_num_hidden              = 5
 move_robber_num_outputs             = 19
 
 # connection enable options
@@ -44,8 +44,8 @@ move_robber_node_delete_prob        = 0.2
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
 # network parameters
-build_road_num_inputs              = 137
-build_road_num_hidden              = 14
+build_road_num_inputs              = 138
+build_road_num_hidden              = 10
 build_road_num_outputs             = 72
 
 # connection enable options
@@ -72,8 +72,8 @@ build_road_node_delete_prob        = 0.2
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
 # network parameters
-build_settlement_num_inputs              = 336
-build_settlement_num_hidden              = 5
+build_settlement_num_inputs              = 316
+build_settlement_num_hidden              = 10
 build_settlement_num_outputs             = 54
 
 # connection enable options
@@ -100,8 +100,8 @@ build_settlement_node_delete_prob        = 0.2
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
 # network parameters
-build_city_num_inputs              = 152
-build_city_num_hidden              = 15
+build_city_num_inputs              = 184
+build_city_num_hidden              = 10
 build_city_num_outputs             = 54
 
 # connection enable options
@@ -122,6 +122,93 @@ build_city_conn_delete_prob        = 0.5
 # node add/remove rates
 build_city_node_add_prob           = 0.2
 build_city_node_delete_prob        = 0.2
+
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+### ### ### ### ###  PLAY YEAR OF PLENTY LOBE   ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+# network parameters
+play_year_of_plenty_num_inputs              = 27
+play_year_of_plenty_num_hidden              = 5
+play_year_of_plenty_num_outputs             = 20
+
+# connection enable options
+play_year_of_plenty_enabled_default         = True
+play_year_of_plenty_enabled_mutate_rate     = 0.01
+
+play_year_of_plenty_feed_forward            = True
+play_year_of_plenty_initial_connection      = full_nodirect
+
+# genome compatibility options
+play_year_of_plenty_compatibility_disjoint_coefficient = 1.0
+play_year_of_plenty_compatibility_weight_coefficient   = 0.5
+
+# connection add/remove rates
+play_year_of_plenty_conn_add_prob           = 0.5
+play_year_of_plenty_conn_delete_prob        = 0.5
+
+# node add/remove rates
+play_year_of_plenty_node_add_prob           = 0.2
+play_year_of_plenty_node_delete_prob        = 0.2
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+### ### ### ### ###    PLAY MONOPOLY    ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+# network parameters
+play_monopoly_num_inputs              = 40
+play_monopoly_num_hidden              = 5
+play_monopoly_num_outputs             = 5
+
+# connection enable options
+play_monopoly_enabled_default         = True
+play_monopoly_enabled_mutate_rate     = 0.01
+
+play_monopoly_feed_forward            = True
+play_monopoly_initial_connection      = full_nodirect
+
+# genome compatibility options
+play_monopoly_compatibility_disjoint_coefficient = 1.0
+play_monopoly_compatibility_weight_coefficient   = 0.5
+
+# connection add/remove rates
+play_monopoly_conn_add_prob           = 0.5
+play_monopoly_conn_delete_prob        = 0.5
+
+# node add/remove rates
+play_monopoly_node_add_prob           = 0.2
+play_monopoly_node_delete_prob        = 0.2
+
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+### ### ### ### ###   MARITIME TRADE    ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+# network parameters
+maritime_trade_num_inputs              = 39
+maritime_trade_num_hidden              = 8
+maritime_trade_num_outputs             = 60
+
+# connection enable options
+maritime_trade_enabled_default         = True
+maritime_trade_enabled_mutate_rate     = 0.01
+
+maritime_trade_feed_forward            = True
+maritime_trade_initial_connection      = full_nodirect
+
+# genome compatibility options
+maritime_trade_compatibility_disjoint_coefficient = 1.0
+maritime_trade_compatibility_weight_coefficient   = 0.5
+
+# connection add/remove rates
+maritime_trade_conn_add_prob           = 0.5
+maritime_trade_conn_delete_prob        = 0.5
+
+# node add/remove rates
+maritime_trade_node_add_prob           = 0.2
+maritime_trade_node_delete_prob        = 0.2
+
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###   DECIDE ACTION TYPE LOBE   ### ### ### ### ###
