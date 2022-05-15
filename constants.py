@@ -9,6 +9,23 @@ ORE = Resource.ORE
 
 resources_array = ["WOOD", "BRICK", "SHEEP", "WHEAT", "ORE", None]
 
+resource_to_resource_index = {
+  WOOD:  0,
+  BRICK: 1,
+  SHEEP: 2,
+  WHEAT: 3,
+  ORE:   4,
+}
+
+port_resource_to_trade_opportunity_index = {
+  WOOD:  0,
+  BRICK: 1,
+  SHEEP: 2,
+  WHEAT: 3,
+  ORE:   4,
+  None:  5 #None refers to a 3:1 trade opportunity
+}
+
 board_number_to_probability = {
   None: 0.0,
   2:  0.028,
@@ -453,6 +470,19 @@ action_type_seen_template = {
   ActionType.MARITIME_TRADE: False,
   ActionType.END_TURN: False
 }
+
+play_turn_action_types = [
+  ActionType.BUILD_ROAD,
+  ActionType.BUILD_SETTLEMENT,
+  ActionType.BUILD_CITY,
+  ActionType.BUY_DEVELOPMENT_CARD,
+  ActionType.PLAY_KNIGHT_CARD,
+  ActionType.PLAY_YEAR_OF_PLENTY,
+  ActionType.PLAY_ROAD_BUILDING,
+  ActionType.PLAY_MONOPOLY,
+  ActionType.MARITIME_TRADE,
+  ActionType.END_TURN
+]
 
 action_type_offsets = {
   ActionType.ROLL: 0,
