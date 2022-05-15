@@ -146,6 +146,18 @@ def get_all_settlement_allocation(game: Game, color: Color):
 
   return list(itertools.chain(*all_players_settlement_allocation))
 
+# Features: 54
+def get_trinary_settlement_ownership(game: Game, color: Color): # 0 for self-owned or vacant, 1 for enemy owned buildings (city or settlement)
+  built_settlements = {}
+  for node_id, (building_owned_by_color, building_type) in game.state.board.buildings.items():
+    if (building_type == BuildingType.SETTLEMENT):
+      value = 1 if building_owned_by_color == color else -1
+      built_settlements[node_id] = value
+
+  trinary_settlement_ownership = constants.all_buildings.copy() # copy established dictionary setting all settlements to 0 (unowned)
+  trinary_settlement_ownership.update(built_settlements) # overwrite any values for owned fields with 1 for self-owned, or -1 for enemy owned.
+  return list(trinary_settlement_ownership.values())
+
 # Whether player j has a city in node i
 # Features: 54 * N
 def get_all_city_allocation(game: Game, color: Color):
@@ -190,6 +202,18 @@ def get_enemy_city_allocation(game: Game, color: Color):
     enemy_players_settlement_allocation.append(list(player_settlement_allocation_dictionary.values()))
 
   return enemy_players_settlement_allocation
+
+# Features: 54
+def get_trinary_city_ownership(game: Game, color: Color): # 0 for self-owned or vacant, 1 for enemy owned buildings (city or settlement)
+  built_cities = {}
+  for node_id, (building_owned_by_color, building_type) in game.state.board.buildings.items():
+    if (building_type == BuildingType.CITY):
+      value = 1 if building_owned_by_color == color else -1
+      built_cities[node_id] = value
+
+  trinary_city_ownership = constants.all_buildings.copy() # copy established dictionary setting all cities to 0 (unowned)
+  trinary_city_ownership.update(built_cities) # overwrite any values for owned fields with 1 for self-owned, or -1 for enemy owned.
+  return list(trinary_city_ownership.values())
 
 #endregion
 
@@ -241,6 +265,22 @@ def get_tile_resource_allocation(game: Game):
     tile_resource_allocation.extend(tile_resource)
 
   assert len(tile_resource_allocation) == 114
+  return tile_resource_allocation
+
+# Whether tile i yields resource.
+# Features: 95
+def get_tile_resource_allocation_strict(game: Game):
+  tile_resource_allocation = []
+  for tile in game.state.board.map.tiles_by_id.values():
+    resource_type = get_resource_type(tile.resource)
+
+    tile_resource = [0]*5
+    if (resource_type != None):
+      resource_index = constants.resources_array.index(resource_type)
+      tile_resource[resource_index] = 1
+    tile_resource_allocation.extend(tile_resource)
+
+  assert len(tile_resource_allocation) == 95
   return tile_resource_allocation
 
 # Tile i’s probability of being rolled.
@@ -301,6 +341,35 @@ def get_own_development_cards(game: Game, color: Color):
   ]
 
   return player_development_card_array
+
+# Number of dev-card cards in hand
+# Features: 1
+def get_own_road_building_development_card_count(game: Game, color: Color):
+  current_player_index = game.state.color_to_index[color]
+  prefix = "P" + str(current_player_index) + "_"
+
+  ps = game.state.player_state
+  player_development_card_array = [
+    ps[prefix + "ROAD_BUILDING_IN_HAND"],
+  ]
+
+  return player_development_card_array
+
+# Number of dev-card cards played
+# Features: 1
+def get_own_road_building_development_card_played_count(game: Game, color: Color):
+  current_player_index = game.state.color_to_index[color]
+  prefix = "P" + str(current_player_index) + "_"
+
+  ps = game.state.player_state
+  player_development_card_array = [
+    ps[prefix + "PLAYED_ROAD_BUILDING"],
+  ]
+
+  return player_development_card_array
+
+def get_all_road_building_development_card_played_count(game:Game, color: Color):
+  return get_player_state_statistics(game, color, ["PLAYED_ROAD_BUILDING"])
 
 # Number of hidden development cards player i has
 # Features: N
@@ -365,6 +434,73 @@ def get_own_actual_victory_points(game: Game, color: Color):
   ]
 
   return player_own_actual_victory_points_array
+
+
+# Returns the trade opportunities available to a player
+# Features: 5
+def get_own_resource_trade_opportunities(game: Game, color: Color):
+  port_resources_array = game.state.board.get_player_port_resources(color)
+  trade_opportunities = [0]*6
+  for port_resource in port_resources_array:
+    trade_opportunity_index = constants.port_resource_to_trade_opportunity_index[port_resource]
+    trade_opportunities[trade_opportunity_index] = 1
+  
+  return trade_opportunities
+
+# Returns the trade opportunities available to each player
+# Features: 5N
+def get_all_resource_trade_opportunities(game: Game, color: Color):
+  all_player_array = get_own_resource_trade_opportunities(game, color)
+
+  for player_color in game.state.colors:
+    if (player_color == color):
+      continue #was already added earlier as the base of the array...
+    else:
+      all_player_array.extend(get_own_resource_trade_opportunities(game, player_color))
+
+  return all_player_array
+
+# Calculates how many of each resource the given player will generate in a single round.
+# Features: 5
+def get_own_resource_income_opportunities(game: Game, color: Color): #TODO: rewrite this to make it cleaner...
+  all_buildings = game.state.buildings_by_color[color]
+  settlements = all_buildings[BuildingType.SETTLEMENT]
+  cities = all_buildings[BuildingType.CITY]
+  
+  
+  resource_income_opportunities = [0] * 5
+  for node_id in settlements:
+    connected_tiles = game.state.board.map.adjacent_tiles[node_id]
+    for tile in connected_tiles:
+      if (tile.resource != None):
+        tile_resource_index = constants.resource_to_resource_index[tile.resource]
+        opportunity_value = constants.board_number_to_probability[tile.number]
+        resource_income_opportunities[tile_resource_index] += opportunity_value
+
+  for node_id in cities:
+    connected_tiles = game.state.board.map.adjacent_tiles[node_id]
+    for tile in connected_tiles:
+      if (tile.resource != None):
+        tile_resource_index = constants.resource_to_resource_index[tile.resource]
+        opportunity_value = constants.board_number_to_probability[tile.number]
+        opportunity_value *= 2 # because it is a city
+        resource_income_opportunities[tile_resource_index] += opportunity_value
+
+  return resource_income_opportunities
+
+# Calculates how many of each resource each player will generate in a single round.
+# Features: 5N
+def get_all_resource_income_opportunities(game: Game, color: Color): #TODO: optimise this so we arent going through the all_buildings for loop in each call..
+  all_player_array = get_own_resource_income_opportunities(game, color)
+
+  for player_color in game.state.colors:
+    if (player_color == color):
+      continue #was already added earlier as the base of the array...
+    else:
+      all_player_array.extend(get_own_resource_income_opportunities(game, player_color))
+
+  return all_player_array
+
 
 # Amount of visible victory points for player i (i.e. doesn’t include hidden victory point cards; only army, road and settlements/cities).
 # Features: N
