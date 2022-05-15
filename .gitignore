@@ -155,4 +155,5 @@ cython_debug/
 *.DS_Store
 .vscode/launch.json
 neat-checkpoint-*
+checkpoints/
 *.svg
