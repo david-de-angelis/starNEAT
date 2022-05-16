@@ -1,4 +1,6 @@
 from __future__ import print_function
+import math
+import time
 from catanatron.game import Color, Game
 from catanatron.models.player import RandomPlayer
 from starNEAT.starNEAT import starNEAT
@@ -8,14 +10,14 @@ import os
 import sys
 import neat
 import random
+import multiprocessing
 import visualise.visualise as visualise
 
 from MyPlayer import MyBrain
 from MyPlayer import MyPlayer
 
 class Experiment(starNEAT):
-  lobes = ["move_robber", "build_city", "build_road", "build_settlement"]
-
+  lobes = ["move_robber", "build_road", "build_settlement", "build_city", "play_year_of_plenty", "play_monopoly", "maritime_trade", "decide_action_type"]
   def __init__(self, config_file_path, epochs):
     super().__init__(config_file_path, epochs)
 
@@ -41,7 +43,7 @@ class Experiment(starNEAT):
     reporters = [
       neat.StdOutReporter(True),
       self.statistics_reporter,
-      neat.Checkpointer(generation_interval=100, filename_prefix='checkpoints/starNEAT-checkpoint-')
+      neat.Checkpointer(generation_interval=25, filename_prefix='checkpoints/starNEAT-checkpoint-'),
     ]
 
     for reporter in reporters:
@@ -49,19 +51,54 @@ class Experiment(starNEAT):
 
 
   def evaluate_genomes(self, genomes, global_config):
-    # Get the same (type of) opponent for all of the population
+    start_time = time.time()
+
     opponent_type = self.get_worthy_opponent_type()
-    for genome_id, genome in genomes:
-      num_games = 1 # should we only play one game per genome to evaluate the population?
-      self.evaluate_genome(genome, global_config.genome_config, opponent_type, num_games=num_games)
+    # Multithreading the game running...
+    num_genomes = len(genomes)
+    remaining_genomes = num_genomes
+    
+    num_processors = multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(num_processors)
+    processes = []
 
+    standard_batch_size = math.ceil(num_genomes/num_processors)
+    batch_index = 0
+    batches = []
 
-  """
-    TODO: consider making the opponent harder as the population becomes more evolved.
-    Return: A valid catan opponent type
-  """
-  def get_worthy_opponent_type(self): 
-    return RandomPlayer
+    while remaining_genomes > 0:
+      batch_size = min(standard_batch_size, remaining_genomes)
+      start_index = batch_size * batch_index
+      end_index = start_index + batch_size
+
+      genome_subset = genomes[start_index:end_index]
+      process = pool.apply_async(self.evaluate_genome_subset, args=(genome_subset, global_config.genome_config, opponent_type, self.neural_network_type, self.lobes))
+
+      processes.append(process)
+      batches.append(genome_subset)
+
+      remaining_genomes -= batch_size
+      batch_index += 1
+
+    #retrieve all of the results from the multiprocessed instances
+    batch_fitnesses = [p.get() for p in processes]
+
+    #Assign the calculated fitnesses from the multiprocessing to the genome objects.
+    for batch, batch_fitness in zip(batches, batch_fitnesses):
+      for (genome_id, genome), fitness in zip(batch, batch_fitness):
+        genome.fitness = fitness
+      
+    time_taken = time.time() - start_time
+    print("Peformed 1000 games multithreadedly in", time_taken, "seconds...")
+
+  @staticmethod
+  def evaluate_genome_subset(genome_subset, genome_config, opponent_type, neural_network_type, lobes):
+    subset_fitness = []
+    for genome_id, genome in genome_subset:
+        fitness, games_won = Experiment.evaluate_genome(genome, genome_config, opponent_type, neural_network_type, lobes, num_games=10)
+        subset_fitness.append(fitness)
+
+    return subset_fitness
 
 
   """
@@ -73,25 +110,27 @@ class Experiment(starNEAT):
     Return:
       games_won (int): the number of games won
   """
-  def evaluate_genome(self, genome, genome_config, opponent_type, num_games = 1): 
-    brain = MyBrain(genome, genome_config, self.neural_network_type, self.lobes)
+  @staticmethod
+  def evaluate_genome(genome, genome_config, opponent_type, neural_network_type, lobes, num_games = 1): 
+    brain = MyBrain(genome, genome_config, neural_network_type, lobes)
 
     games_won = 0
     player_cumulative_fitness = 0.0
 
     for i in range(num_games):
-      game = self.play_game(brain, opponent_type)
+      game = Experiment.play_game(brain, opponent_type)
       # any value above 10 is effectively equal to 10 in the game of Catan, all are considered a win, none of which is better than the other.
       player_cumulative_fitness += min(get_fitness_from_game_state(game, Color.BLUE), 10.0) #User's player should always be BLUE.
       if game.winning_color() == Color.BLUE:
         games_won += 1
       
+    fitness = player_cumulative_fitness
+    # genome.fitness = 
+    return (fitness, games_won)
 
-    genome.fitness = player_cumulative_fitness / num_games
-    return games_won
 
-
-  def play_game(self, brain, opponent_type):
+  @staticmethod
+  def play_game(brain, opponent_type):
     player = MyPlayer(brain, Color.BLUE) #User's player should always be BLUE.
     opponent = opponent_type(Color.RED)
 
@@ -110,8 +149,9 @@ class Experiment(starNEAT):
 
 
   def formally_evaluate_best_genome(self, best_genome):
-    games_won = self.evaluate_genome(best_genome, self.config.genome_config, RandomPlayer, 100)
-    print("The best genome won", games_won, "games out of 100 against a RandomPlayer!")
+    num_games = 100
+    genome_fitness, games_won = self.evaluate_genome(best_genome, self.config.genome_config, RandomPlayer, self.neural_network_type, self.lobes, num_games=num_games)
+    print("The best genome won", games_won, "games out of", str(num_games), "against a RandomPlayer!")
 
 
   def wrap_up(self, best_genome):
@@ -119,6 +159,15 @@ class Experiment(starNEAT):
     print('\nOutput:')
     self.formally_evaluate_best_genome(best_genome)
     self.show_statistics()
+
+
+  """
+    TODO: consider making the opponent harder as the population becomes more evolved.
+    Return: A valid catan opponent type
+  """
+  def get_worthy_opponent_type(self): 
+    return RandomPlayer
+
 
   def show_statistics(self):
     try:
@@ -139,12 +188,12 @@ if __name__ == '__main__':
   config_path = os.path.join(local_dir, 'config-feedforward')
 
   epochs = int(sys.argv[1]) if len(sys.argv) > 1 else 20
-  checkpoint = "neat-checkpoint-349"
+  checkpoint = None #"neat-checkpoint-349"
   
   print("Running", epochs, "epochs ", end="")
   if (checkpoint != None):
     print("on", checkpoint, end="")
   print("...", checkpoint)
-  exit()
-  Experiment(config_path, epochs, checkpoint).run()
+  
+  Experiment(config_path, epochs).run()
   
