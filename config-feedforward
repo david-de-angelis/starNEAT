@@ -8,7 +8,7 @@ reset_on_extinction   = False
 [BrainGenome]
 
 #NEW GLOBAL FIELDS:
-brain_lobes           = move_robber build_road build_settlement build_city play_year_of_plenty play_monopoly maritime_trade
+brain_lobes           = move_robber build_road build_settlement build_city play_year_of_plenty play_monopoly maritime_trade decide_action_type
 
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
@@ -215,8 +215,8 @@ maritime_trade_node_delete_prob        = 0.2
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
 # network parameters
-decide_action_type_num_inputs              = 609
-decide_action_type_num_hidden              = 61
+decide_action_type_num_inputs              = 64
+decide_action_type_num_hidden              = 5
 decide_action_type_num_outputs             = 10
 
 # connection enable options
