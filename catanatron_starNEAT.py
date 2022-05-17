@@ -3,6 +3,7 @@ import math
 import time
 from catanatron.game import Color, Game
 from catanatron.models.player import RandomPlayer
+from catanatron.players import weighted_random
 from starNEAT.starNEAT import starNEAT
 from custom_state_functions import get_fitness_from_game_state
 
@@ -18,8 +19,8 @@ from MyPlayer import MyPlayer
 
 class Experiment(starNEAT):
   lobes = ["move_robber", "build_road", "build_settlement", "build_city", "play_year_of_plenty", "play_monopoly", "maritime_trade", "decide_action_type"]
-  def __init__(self, config_file_path, epochs):
-    super().__init__(config_file_path, epochs)
+  def __init__(self, config_file_path, epochs, checkpoint = None):
+    super().__init__(config_file_path, epochs, checkpoint)
 
 
   """
@@ -29,10 +30,10 @@ class Experiment(starNEAT):
     Return:
       best_genome (starNeat.BrainGenome.BrainGenome): the best genome in the evolved population
   """
-  def run(self, checkpoint = None):
+  def run(self):
     # Add execution reporters (monitors the execution throughout its lifetime)
     self.add_reporters()
-    best_genome = super().run(checkpoint)
+    best_genome = super().run()
     #perform post-run analysis
     self.wrap_up(best_genome)
     return best_genome
@@ -43,7 +44,7 @@ class Experiment(starNEAT):
     reporters = [
       neat.StdOutReporter(True),
       self.statistics_reporter,
-      neat.Checkpointer(generation_interval=25, filename_prefix='checkpoints/starNEAT-checkpoint-'),
+      neat.Checkpointer(generation_interval=100, filename_prefix='checkpoints/starNEAT-checkpoint-'),
     ]
 
     for reporter in reporters:
@@ -120,7 +121,10 @@ class Experiment(starNEAT):
     for i in range(num_games):
       game = Experiment.play_game(brain, opponent_type)
       # any value above 10 is effectively equal to 10 in the game of Catan, all are considered a win, none of which is better than the other.
-      player_cumulative_fitness += min(get_fitness_from_game_state(game, Color.BLUE), 10.0) #User's player should always be BLUE.
+      fitness_from_game = min(float(get_fitness_from_game_state(game, Color.BLUE)), 10.0) #User's player should always be BLUE.
+      fitness_from_game -= game.state.num_turns * 0.005 # the fewer turns the better
+
+      player_cumulative_fitness += fitness_from_game
       if game.winning_color() == Color.BLUE:
         games_won += 1
       
@@ -180,6 +184,8 @@ class Experiment(starNEAT):
     except:
       print("Failed to load 'plot_species' visualisation...")
 
+
+#e.g. $ python3 catanatron_startNEAT.py 20 checkpoints/starNEAT-checkpoint-16
 if __name__ == '__main__':
   # Determine path to configuration file. This path manipulation is
   # here so that the script will run successfully regardless of the
@@ -188,12 +194,11 @@ if __name__ == '__main__':
   config_path = os.path.join(local_dir, 'config-feedforward')
 
   epochs = int(sys.argv[1]) if len(sys.argv) > 1 else 20
-  checkpoint = None #"neat-checkpoint-349"
+  checkpoint = sys.argv[2] if len(sys.argv) > 2 else None
   
   print("Running", epochs, "epochs ", end="")
   if (checkpoint != None):
     print("on", checkpoint, end="")
-  print("...", checkpoint)
+  print("...")
   
-  Experiment(config_path, epochs).run()
-  
+  Experiment(config_path, epochs, checkpoint).run()
