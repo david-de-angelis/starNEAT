@@ -296,20 +296,15 @@ class MyBrain(EmulatedBrain):
 
 
     def decide_action_type(self, game: Game, playable_action_types_seen):
-      odds = [0.99, 0.89, 0.79, 0.69, 0.59, 0.49, 0.39, 0.29, 0.19, 0.09]
-      random.shuffle(odds)
-      action_type = self.get_best_valid_action_type(odds, playable_action_types_seen)
-      return action_type
+      # # uncomment to bypass...
+      # odds = [0.99, 0.89, 0.79, 0.69, 0.59, 0.49, 0.39, 0.29, 0.19, 0.09]
+      # random.shuffle(odds)
+      # action_type = self.get_best_valid_action_type(odds, playable_action_types_seen)
+      # return action_type
 
       input_resources_array = custom_state_functions.get_bank_resources_array(game)
-      input_bank_development_cards_count = custom_state_functions.get_bank_development_cards_count(game)
-      input_all_road_allocation = custom_state_functions.get_all_road_allocation(game, self.color)
-      input_all_settlement_allocation = custom_state_functions.get_all_settlement_allocation(game, self.color)
-      input_all_city_allocation = custom_state_functions.get_all_city_allocation(game, self.color)
-      input_port_resource_allocation = custom_state_functions.get_port_resource_allocation(game)
-      input_tile_robber_allocation = custom_state_functions.get_tile_robber_allocation(game)
-      input_tile_resource_allocation = custom_state_functions.get_tile_resource_allocation(game)
-      input_tile_probabilities = custom_state_functions.get_tile_probabilities(game)
+      input_all_resource_trade_opportunities = custom_state_functions.get_all_resource_trade_opportunities(game, self.color)
+      input_all_resource_income_opportunities = custom_state_functions.get_all_resource_income_opportunities(game, self.color)
       input_own_actual_victory_points = custom_state_functions.get_own_actual_victory_points(game, self.color)
       input_own_resources = custom_state_functions.get_own_resources(game, self.color)
       input_own_development_cards = custom_state_functions.get_own_development_cards(game, self.color)
@@ -324,7 +319,7 @@ class MyBrain(EmulatedBrain):
       input_all_public_victory_points = custom_state_functions.get_all_public_victory_points(game, self.color)
       input_all_player_development_card_played = custom_state_functions.get_all_player_development_card_played(game, self.color)
 
-      input = list(itertools.chain(input_resources_array, input_bank_development_cards_count, input_all_road_allocation, input_all_settlement_allocation, input_all_city_allocation, input_port_resource_allocation, input_tile_robber_allocation, input_tile_resource_allocation, input_tile_probabilities, input_own_actual_victory_points, input_own_resources, input_own_development_cards, input_all_players_development_cards_count, input_all_players_resource_count, input_largest_army_trophy_allocation, input_longest_road_trophy_allocation, input_all_player_roads_left, input_all_player_settlements_left, input_all_player_cities_left, input_all_player_longest_road_length, input_all_public_victory_points, input_all_player_development_card_played))
+      input = list(itertools.chain(input_resources_array, input_all_resource_trade_opportunities, input_all_resource_income_opportunities, input_own_actual_victory_points, input_own_resources, input_own_development_cards, input_all_players_development_cards_count, input_all_players_resource_count, input_largest_army_trophy_allocation, input_longest_road_trophy_allocation, input_all_player_roads_left, input_all_player_settlements_left, input_all_player_cities_left, input_all_player_longest_road_length, input_all_public_victory_points, input_all_player_development_card_played))
       output = self.lobe_decide_action_type.activate(input)
       action_type = self.get_best_valid_action_type(output, playable_action_types_seen)
       return action_type
