@@ -8,7 +8,7 @@ from starNEAT.BrainEmulator import EmulatedBrain
 
 class starNEAT():
 
-  def __init__(self, config_file_path, epochs):
+  def __init__(self, config_file_path, epochs, checkpoint = None):
     assert len(self.lobes) > 0
 
     self.config_file_path = config_file_path
@@ -16,8 +16,19 @@ class starNEAT():
     self.statistics_reporter = None
     self.neural_network_type = FeedForward
     self.config = neat.Config(BrainGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, self.config_file_path)
-    self.population = neat.Population(self.config) # the population is the top-level object for the NEAT algorithm.
+    # the population is the top-level object for the NEAT algorithm.
+    if checkpoint == None:
+      print("Initialising population from scratch:")
+      self.population = neat.Population(self.config)
+    else:
+      print("Initialising population with checkpoint:", checkpoint)
+      self.population = self.get_population_from_checkpoint(checkpoint) 
 
+    print("starNEAT initialisation complete.")
+
+  def get_population_from_checkpoint(self, checkpoint):
+    population = neat.Checkpointer.restore_checkpoint(checkpoint)
+    return population
 
   """
     Runs the starNEAT algorithm
@@ -26,12 +37,7 @@ class starNEAT():
   """
   def run(self, checkpoint = None):
     # Execute the evaluation & evolution.
-    if checkpoint == None:
-      population = self.population  
-    else:
-      print("Initialising population with checkpoint:", checkpoint)
-      population = neat.Checkpointer.restore_checkpoint(checkpoint)
-    return population.run(self.evaluate_genomes, self.epochs)
+    return self.population.run(self.evaluate_genomes, self.epochs)
 
 
   def evaluate_genomes(self, genomes, global_config):
