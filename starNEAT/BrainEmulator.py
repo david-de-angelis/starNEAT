@@ -8,6 +8,7 @@ class EmulatedBrain():
         self.genome_config = genome_config
         self.neural_network_type = neural_network_type
         self.lobes = lobes
+        #should set lobes based on config...
 
         self.init_lazy_loadable_lobes()
 
