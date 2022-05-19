@@ -1,10 +1,14 @@
-import itertools
+from operator import ge
+import os
+import sys
 import random
-import time
+import itertools
 from typing import Iterable
 from catanatron.game import Action, Color, Game, Player
 from catanatron.models.enums import ActionPrompt, ActionType, Action
+
 from starNEAT.BrainEmulator import EmulatedBrain
+from starNEAT.nn.FeedForward import FeedForward
 import constants
 import custom_state_functions
 
@@ -18,6 +22,16 @@ class MyPlayer(Player):
 
   def decide(self, game: Game, playable_actions: Iterable[Action]):
     return self.brain.decide(game, playable_actions)
+
+  @staticmethod
+  def evaluate_genome_from_checkpoint(checkpoint_file_name):
+    #preventing circular references, these packages are only required in this static method.
+    from reporters.AdvancedCheckpointer import AdvancedCheckpointer
+    from catanatron_starNEAT import Experiment
+
+    config, genome  = AdvancedCheckpointer.restore_best_genome(checkpoint_file_name)
+    lobes = ["move_robber", "build_road", "build_settlement", "build_city", "play_year_of_plenty", "play_monopoly", "maritime_trade", "decide_action_type"]
+    Experiment.formally_evaluate_genome(genome, config.genome_config, FeedForward, lobes)
 
 
 class MyBrain(EmulatedBrain):
@@ -73,7 +87,7 @@ class MyBrain(EmulatedBrain):
       raise Exception("Returned no action type")
 
 
-    def hydrate_move_robber_action(self, playable_actions, unhydrated_action: Action):
+    def hydrate_move_robber_action(self, game: Game, playable_actions, unhydrated_action: Action):
       unhydrated_action_coordinate = unhydrated_action.value
       potential_actions = []
       for playable_action in playable_actions:
@@ -87,7 +101,11 @@ class MyBrain(EmulatedBrain):
           potential_actions.append(playable_action)
       
       # pick a colour to steal from - we dont know who has what resource though, so maybe just guess, or take from the highest scoring player...
-      action = random.choice(potential_actions) # TODO: take resources from other players where available
+      if len(potential_actions) == 1:
+        return potential_actions[0]
+      
+      # TODO: take resources from other players where available
+      action = random.choice(potential_actions)
       return action
 
 
@@ -184,7 +202,7 @@ class MyBrain(EmulatedBrain):
       input = list(itertools.chain(input_bank_resources_array, input_trinary_settlement_ownership, input_trinary_city_ownership, input_tile_resource_allocation_strict, input_tile_probabilities, input_own_actual_victory_points, input_own_resources, input_own_development_cards, input_all_public_victory_points))
       output = self.lobe_move_robber.activate(input)
       unhydrated_action = self.get_best_valid_action(output, ActionType.MOVE_ROBBER, playable_actions_id_set)
-      action = self.hydrate_move_robber_action(playable_actions, unhydrated_action)
+      action = self.hydrate_move_robber_action(game, playable_actions, unhydrated_action)
       return action
 
 
@@ -343,3 +361,10 @@ class MyBrain(EmulatedBrain):
     def end_turn(self):
       action_skeleton = (ActionType.END_TURN, None)
       return custom_state_functions.get_action_from_action_skeleton(self.color, action_skeleton)
+
+
+#e.g. $ python3 MyPlayer.py checkpoints/2022-01-01-08-30/starNEAT-checkpoint-16-best-genome
+if __name__ == '__main__':
+  checkpoint = sys.argv[1]
+  MyPlayer.evaluate_genome_from_checkpoint(checkpoint)
+  
