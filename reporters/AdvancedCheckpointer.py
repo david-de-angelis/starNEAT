@@ -20,7 +20,9 @@ class AdvancedCheckpointer(Checkpointer):
     """
     def __init__(self, generation_interval=100, time_interval_seconds=300, filename_prefix='neat-checkpoint-', epochs = None):
       self.epochs = epochs
-      self.global_best_fitness = None
+      self.global_best_genome_fitness = None
+      self.local_best_genome_fitness = None
+      self.local_best_genome = None
       self.createPathIfNotExists(filename_prefix)
       super().__init__(generation_interval, time_interval_seconds, filename_prefix)
       print("~~~~~~~~~ AdvancedCheckpointer INITIALISED! ~~~~~~~~~")
@@ -34,10 +36,20 @@ class AdvancedCheckpointer(Checkpointer):
         print("Created checkpoint path:", path)
 
     def post_evaluate(self, config, population, species, population_best_genome):
-        # best will be none if none of the genomes in the population beat the global best
-        if self.global_best_fitness == None or population_best_genome.fitness > self.global_best_fitness: 
-            self.global_best_fitness = population_best_genome.fitness
-            self.save_best_genome(config, population_best_genome, self.current_generation)
+
+        # reset the local-maxima every x generations
+        if (self.current_generation > 0 and self.current_generation % self.generation_interval == 0):
+            self.save_genome(config, population_best_genome, self.current_generation, 'local')
+            self.local_best_genome_fitness = None 
+
+        # store value if it is the local maxima
+        if self.local_best_genome_fitness == None or population_best_genome.fitness > self.local_best_genome_fitness: 
+            self.local_best_genome_fitness = population_best_genome.fitness
+            self.local_best_genome = population_best_genome
+
+        if self.global_best_genome_fitness == None or population_best_genome.fitness > self.global_best_genome_fitness: 
+            self.global_best_genome_fitness = population_best_genome.fitness
+            self.save_genome(config, population_best_genome, self.current_generation, 'global-maxima')
 
     def end_generation(self, config, population, species_set):
         checkpoint_due = False
@@ -60,19 +72,17 @@ class AdvancedCheckpointer(Checkpointer):
             self.last_generation_checkpoint = self.current_generation
             self.last_time_checkpoint = time.time()
 
-    def save_best_genome(self, config, best, generation):
+    def save_genome(self, config, best, generation, suffix):
         """ Save the current simulation state. """
-        filename = '{0}{1}-best-genome'.format(self.filename_prefix, generation)
+        filename = '{0}{1}-{2}'.format(self.filename_prefix, generation, suffix)
         print("Saving best genome yet to {0}".format(filename))
-        # print("Best:")
-        # print(best)
 
         with gzip.open(filename, 'w', compresslevel=5) as f:
             data = (config, best, random.getstate())
             pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
-    def restore_best_genome(filename):
+    def restore_genome(filename):
         """Restores a genome from a previous saved point."""
         with gzip.open(filename) as f:
             config, best, rndstate = pickle.load(f)
