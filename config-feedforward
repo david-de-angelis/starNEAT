@@ -11,13 +11,16 @@ reset_on_extinction   = False
 brain_lobes           = move_robber build_road build_settlement build_city play_year_of_plenty play_monopoly maritime_trade decide_action_type
 
 
+
+
+
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###  MOVE ROBBER LOBE   ### ### ### ### ###
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 
 # network parameters
 move_robber_num_inputs              = 240
-move_robber_num_hidden              = 5
+move_robber_num_hidden              = 3
 move_robber_num_outputs             = 19
 
 # connection enable options
@@ -29,15 +32,39 @@ move_robber_initial_connection      = full_nodirect
 
 # genome compatibility options
 move_robber_compatibility_disjoint_coefficient = 1.0
-move_robber_compatibility_weight_coefficient   = 0.5
+move_robber_compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-move_robber_conn_add_prob           = 0.5
-move_robber_conn_delete_prob        = 0.5
+move_robber_conn_add_prob           = 0.4
+move_robber_conn_delete_prob        = 0.4
 
 # node add/remove rates
 move_robber_node_add_prob           = 0.2
 move_robber_node_delete_prob        = 0.2
+
+# bias parameters
+move_robber_bias_init_type          = gaussian
+move_robber_bias_init_mean          = 0.0
+move_robber_bias_init_stdev         = 1.0
+move_robber_bias_replace_rate       = 0.02
+move_robber_bias_mutate_rate        = 0.6
+move_robber_bias_mutate_power       = 0.4
+move_robber_bias_max_value          = 30.0
+move_robber_bias_min_value          = -30.0
+
+# activation parameters
+move_robber_activation_default      = sigmoid
+move_robber_activation_mutate_rate  = 0.0
+move_robber_activation_options      = sigmoid
+
+# aggregation parameters
+move_robber_aggregation_default     = sum
+move_robber_aggregation_options     = sum
+move_robber_aggregation_mutate_rate = 0.0
+
+
+
+
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###   BUILD ROAD LOBE   ### ### ### ### ###
@@ -45,7 +72,7 @@ move_robber_node_delete_prob        = 0.2
 
 # network parameters
 build_road_num_inputs              = 138
-build_road_num_hidden              = 10
+build_road_num_hidden              = 3
 build_road_num_outputs             = 72
 
 # connection enable options
@@ -57,15 +84,39 @@ build_road_initial_connection      = full_nodirect
 
 # genome compatibility options
 build_road_compatibility_disjoint_coefficient = 1.0
-build_road_compatibility_weight_coefficient   = 0.5
+build_road_compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-build_road_conn_add_prob           = 0.5
-build_road_conn_delete_prob        = 0.5
+build_road_conn_add_prob           = 0.4
+build_road_conn_delete_prob        = 0.4
 
 # node add/remove rates
 build_road_node_add_prob           = 0.2
 build_road_node_delete_prob        = 0.2
+
+# bias parameters
+build_road_bias_init_type          = gaussian
+build_road_bias_init_mean          = 0.0
+build_road_bias_init_stdev         = 1.0
+build_road_bias_replace_rate       = 0.02
+build_road_bias_mutate_rate        = 0.6
+build_road_bias_mutate_power       = 0.4
+build_road_bias_max_value          = 30.0
+build_road_bias_min_value          = -30.0
+
+# activation parameters
+build_road_activation_default      = sigmoid
+build_road_activation_mutate_rate  = 0.0
+build_road_activation_options      = sigmoid
+
+# aggregation parameters
+build_road_aggregation_default     = sum
+build_road_aggregation_options     = sum
+build_road_aggregation_mutate_rate = 0.0
+
+
+
+
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ###    BUILD SETTLEMENT LOBE    ### ### ### ###
@@ -73,7 +124,7 @@ build_road_node_delete_prob        = 0.2
 
 # network parameters
 build_settlement_num_inputs              = 316
-build_settlement_num_hidden              = 10
+build_settlement_num_hidden              = 3
 build_settlement_num_outputs             = 54
 
 # connection enable options
@@ -85,15 +136,39 @@ build_settlement_initial_connection      = full_nodirect
 
 # genome compatibility options
 build_settlement_compatibility_disjoint_coefficient = 1.0
-build_settlement_compatibility_weight_coefficient   = 0.5
+build_settlement_compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-build_settlement_conn_add_prob           = 0.5
-build_settlement_conn_delete_prob        = 0.5
+build_settlement_conn_add_prob           = 0.4
+build_settlement_conn_delete_prob        = 0.4
 
 # node add/remove rates
 build_settlement_node_add_prob           = 0.2
 build_settlement_node_delete_prob        = 0.2
+
+# bias parameters
+build_settlement_bias_init_type          = gaussian
+build_settlement_bias_init_mean          = 0.0
+build_settlement_bias_init_stdev         = 1.0
+build_settlement_bias_replace_rate       = 0.02
+build_settlement_bias_mutate_rate        = 0.6
+build_settlement_bias_mutate_power       = 0.4
+build_settlement_bias_max_value          = 30.0
+build_settlement_bias_min_value          = -30.0
+
+# activation parameters
+build_settlement_activation_default      = sigmoid
+build_settlement_activation_mutate_rate  = 0.0
+build_settlement_activation_options      = sigmoid
+
+# aggregation parameters
+build_settlement_aggregation_default     = sum
+build_settlement_aggregation_options     = sum
+build_settlement_aggregation_mutate_rate = 0.0
+
+
+
+
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###   BUILD CITY LOBE   ### ### ### ### ###
@@ -101,7 +176,7 @@ build_settlement_node_delete_prob        = 0.2
 
 # network parameters
 build_city_num_inputs              = 184
-build_city_num_hidden              = 10
+build_city_num_hidden              = 3
 build_city_num_outputs             = 54
 
 # connection enable options
@@ -113,15 +188,38 @@ build_city_initial_connection      = full_nodirect
 
 # genome compatibility options
 build_city_compatibility_disjoint_coefficient = 1.0
-build_city_compatibility_weight_coefficient   = 0.5
+build_city_compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-build_city_conn_add_prob           = 0.5
-build_city_conn_delete_prob        = 0.5
+build_city_conn_add_prob           = 0.4
+build_city_conn_delete_prob        = 0.4
 
 # node add/remove rates
 build_city_node_add_prob           = 0.2
 build_city_node_delete_prob        = 0.2
+
+# bias parameters
+build_city_bias_init_type          = gaussian
+build_city_bias_init_mean          = 0.0
+build_city_bias_init_stdev         = 1.0
+build_city_bias_replace_rate       = 0.02
+build_city_bias_mutate_rate        = 0.6
+build_city_bias_mutate_power       = 0.4
+build_city_bias_max_value          = 30.0
+build_city_bias_min_value          = -30.0
+
+# activation parameters
+build_city_activation_default      = sigmoid
+build_city_activation_mutate_rate  = 0.0
+build_city_activation_options      = sigmoid
+
+# aggregation parameters
+build_city_aggregation_default     = sum
+build_city_aggregation_options     = sum
+build_city_aggregation_mutate_rate = 0.0
+
+
+
 
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -130,7 +228,7 @@ build_city_node_delete_prob        = 0.2
 
 # network parameters
 play_year_of_plenty_num_inputs              = 27
-play_year_of_plenty_num_hidden              = 5
+play_year_of_plenty_num_hidden              = 3
 play_year_of_plenty_num_outputs             = 20
 
 # connection enable options
@@ -142,15 +240,39 @@ play_year_of_plenty_initial_connection      = full_nodirect
 
 # genome compatibility options
 play_year_of_plenty_compatibility_disjoint_coefficient = 1.0
-play_year_of_plenty_compatibility_weight_coefficient   = 0.5
+play_year_of_plenty_compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-play_year_of_plenty_conn_add_prob           = 0.5
-play_year_of_plenty_conn_delete_prob        = 0.5
+play_year_of_plenty_conn_add_prob           = 0.4
+play_year_of_plenty_conn_delete_prob        = 0.4
 
 # node add/remove rates
 play_year_of_plenty_node_add_prob           = 0.2
 play_year_of_plenty_node_delete_prob        = 0.2
+
+# bias parameters
+play_year_of_plenty_bias_init_type          = gaussian
+play_year_of_plenty_bias_init_mean          = 0.0
+play_year_of_plenty_bias_init_stdev         = 1.0
+play_year_of_plenty_bias_replace_rate       = 0.02
+play_year_of_plenty_bias_mutate_rate        = 0.6
+play_year_of_plenty_bias_mutate_power       = 0.4
+play_year_of_plenty_bias_max_value          = 30.0
+play_year_of_plenty_bias_min_value          = -30.0
+
+# activation parameters
+play_year_of_plenty_activation_default      = sigmoid
+play_year_of_plenty_activation_mutate_rate  = 0.0
+play_year_of_plenty_activation_options      = sigmoid
+
+# aggregation parameters
+play_year_of_plenty_aggregation_default     = sum
+play_year_of_plenty_aggregation_options     = sum
+play_year_of_plenty_aggregation_mutate_rate = 0.0
+
+
+
+
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 ### ### ### ### ###    PLAY MONOPOLY    ### ### ### ### ###
@@ -158,7 +280,7 @@ play_year_of_plenty_node_delete_prob        = 0.2
 
 # network parameters
 play_monopoly_num_inputs              = 40
-play_monopoly_num_hidden              = 5
+play_monopoly_num_hidden              = 3
 play_monopoly_num_outputs             = 5
 
 # connection enable options
@@ -170,15 +292,38 @@ play_monopoly_initial_connection      = full_nodirect
 
 # genome compatibility options
 play_monopoly_compatibility_disjoint_coefficient = 1.0
-play_monopoly_compatibility_weight_coefficient   = 0.5
+play_monopoly_compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-play_monopoly_conn_add_prob           = 0.5
-play_monopoly_conn_delete_prob        = 0.5
+play_monopoly_conn_add_prob           = 0.4
+play_monopoly_conn_delete_prob        = 0.4
 
 # node add/remove rates
 play_monopoly_node_add_prob           = 0.2
 play_monopoly_node_delete_prob        = 0.2
+
+# bias parameters
+play_monopoly_bias_init_type          = gaussian
+play_monopoly_bias_init_mean          = 0.0
+play_monopoly_bias_init_stdev         = 1.0
+play_monopoly_bias_replace_rate       = 0.02
+play_monopoly_bias_mutate_rate        = 0.6
+play_monopoly_bias_mutate_power       = 0.4
+play_monopoly_bias_max_value          = 30.0
+play_monopoly_bias_min_value          = -30.0
+
+# activation parameters
+play_monopoly_activation_default      = sigmoid
+play_monopoly_activation_mutate_rate  = 0.0
+play_monopoly_activation_options      = sigmoid
+
+# aggregation parameters
+play_monopoly_aggregation_default     = sum
+play_monopoly_aggregation_options     = sum
+play_monopoly_aggregation_mutate_rate = 0.0
+
+
+
 
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -187,7 +332,7 @@ play_monopoly_node_delete_prob        = 0.2
 
 # network parameters
 maritime_trade_num_inputs              = 39
-maritime_trade_num_hidden              = 8
+maritime_trade_num_hidden              = 3
 maritime_trade_num_outputs             = 60
 
 # connection enable options
@@ -199,15 +344,38 @@ maritime_trade_initial_connection      = full_nodirect
 
 # genome compatibility options
 maritime_trade_compatibility_disjoint_coefficient = 1.0
-maritime_trade_compatibility_weight_coefficient   = 0.5
+maritime_trade_compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-maritime_trade_conn_add_prob           = 0.5
-maritime_trade_conn_delete_prob        = 0.5
+maritime_trade_conn_add_prob           = 0.4
+maritime_trade_conn_delete_prob        = 0.4
 
 # node add/remove rates
 maritime_trade_node_add_prob           = 0.2
 maritime_trade_node_delete_prob        = 0.2
+
+# bias parameters
+maritime_trade_bias_init_type          = gaussian
+maritime_trade_bias_init_mean          = 0.0
+maritime_trade_bias_init_stdev         = 1.0
+maritime_trade_bias_replace_rate       = 0.02
+maritime_trade_bias_mutate_rate        = 0.6
+maritime_trade_bias_mutate_power       = 0.4
+maritime_trade_bias_max_value          = 30.0
+maritime_trade_bias_min_value          = -30.0
+
+# activation parameters
+maritime_trade_activation_default      = sigmoid
+maritime_trade_activation_mutate_rate  = 0.0
+maritime_trade_activation_options      = sigmoid
+
+# aggregation parameters
+maritime_trade_aggregation_default     = sum
+maritime_trade_aggregation_options     = sum
+maritime_trade_aggregation_mutate_rate = 0.0
+
+
+
 
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
@@ -216,7 +384,7 @@ maritime_trade_node_delete_prob        = 0.2
 
 # network parameters
 decide_action_type_num_inputs              = 64
-decide_action_type_num_hidden              = 5
+decide_action_type_num_hidden              = 3
 decide_action_type_num_outputs             = 10
 
 # connection enable options
@@ -228,52 +396,67 @@ decide_action_type_initial_connection      = full_nodirect
 
 # genome compatibility options
 decide_action_type_compatibility_disjoint_coefficient = 1.0
-decide_action_type_compatibility_weight_coefficient   = 0.5
+decide_action_type_compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-decide_action_type_conn_add_prob           = 0.5
-decide_action_type_conn_delete_prob        = 0.5
+decide_action_type_conn_add_prob           = 0.4
+decide_action_type_conn_delete_prob        = 0.4
 
 # node add/remove rates
 decide_action_type_node_add_prob           = 0.2
 decide_action_type_node_delete_prob        = 0.2
 
+# bias parameters
+decide_action_type_bias_init_type          = gaussian
+decide_action_type_bias_init_mean          = 0.0
+decide_action_type_bias_init_stdev         = 1.0
+decide_action_type_bias_replace_rate       = 0.02
+decide_action_type_bias_mutate_rate        = 0.6
+decide_action_type_bias_mutate_power       = 0.4
+decide_action_type_bias_max_value          = 30.0
+decide_action_type_bias_min_value          = -30.0
+
+# activation parameters
+decide_action_type_activation_default      = sigmoid
+decide_action_type_activation_mutate_rate  = 0.0
+decide_action_type_activation_options      = sigmoid
+
+# aggregation parameters
+decide_action_type_aggregation_default     = sum
+decide_action_type_aggregation_options     = sum
+decide_action_type_aggregation_mutate_rate = 0.0
+
+
+
+
+
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
 ### ### ### ### ###       DEFAULT       ### ### ### ### ###
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
-# node activation options
-activation_default      = sigmoid
-activation_mutate_rate  = 0.0
-activation_options      = sigmoid
-
-# node aggregation options
-aggregation_default     = sum
-aggregation_mutate_rate = 0.0
-aggregation_options     = sum
-
-# node bias options
+# bias parameters
+bias_init_type          = gaussian
 bias_init_mean          = 0.0
 bias_init_stdev         = 1.0
+bias_replace_rate       = 0.02
+bias_mutate_rate        = 0.6
+bias_mutate_power       = 0.4
 bias_max_value          = 30.0
 bias_min_value          = -30.0
-bias_mutate_power       = 0.5
-bias_mutate_rate        = 0.7
-bias_replace_rate       = 0.1
 
 # genome compatibility options
 compatibility_disjoint_coefficient = 1.0
-compatibility_weight_coefficient   = 0.5
+compatibility_weight_coefficient   = 1.0
 
 # connection add/remove rates
-conn_add_prob           = 0.5
-conn_delete_prob        = 0.5
+conn_add_prob           = 0.4
+conn_delete_prob        = 0.4
 
 # connection enable options
 enabled_default         = True
 enabled_mutate_rate     = 0.01
 
 feed_forward            = True
-initial_connection      = full
+initial_connection      = full_nodirect
 
 # node add/remove rates
 node_add_prob           = 0.2
@@ -281,7 +464,7 @@ node_delete_prob        = 0.2
 
 # network parameters
 num_inputs              = 2
-num_hidden              = 0
+num_hidden              = 1
 num_outputs             = 1
 
 # node response options
@@ -302,13 +485,23 @@ weight_mutate_power     = 0.5
 weight_mutate_rate      = 0.8
 weight_replace_rate     = 0.1
 
+# activation parameters
+activation_default      = sigmoid
+activation_mutate_rate  = 0.0
+activation_options      = sigmoid
+
+# aggregation parameters
+aggregation_default     = sum
+aggregation_options     = sum
+aggregation_mutate_rate = 0.0
+
 [DefaultSpeciesSet]
-compatibility_threshold = 3
+compatibility_threshold = 3.3
 
 [DefaultStagnation]
 species_fitness_func = mean
-max_stagnation       = 50
-species_elitism      = 2
+max_stagnation       = 80
+species_elitism      = 3
 
 [DefaultReproduction]
 elitism            = 2
