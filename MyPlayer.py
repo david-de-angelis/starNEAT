@@ -29,7 +29,7 @@ class MyPlayer(Player):
     from reporters.AdvancedCheckpointer import AdvancedCheckpointer
     from catanatron_starNEAT import Experiment
 
-    config, genome  = AdvancedCheckpointer.restore_best_genome(checkpoint_file_name)
+    config, genome  = AdvancedCheckpointer.restore_genome(checkpoint_file_name)
     lobes = ["move_robber", "build_road", "build_settlement", "build_city", "play_year_of_plenty", "play_monopoly", "maritime_trade", "decide_action_type"]
     Experiment.formally_evaluate_genome(genome, config.genome_config, FeedForward, lobes)
 
