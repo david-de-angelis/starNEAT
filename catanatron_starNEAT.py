@@ -171,8 +171,11 @@ class Experiment(starNEAT):
 
   @staticmethod
   def play_game(brain, opponent_type):
-    player = MyPlayer(brain, Color.BLUE) #User's player should always be BLUE.
-    opponent = Experiment.get_opponent_from_type(opponent_type, Color.RED)
+    colors = [Color.BLUE, Color.RED, Color.WHITE, Color.ORANGE]
+    random.shuffle(colors)
+
+    player = MyPlayer(brain, colors[0])
+    opponent = Experiment.get_opponent_from_type(opponent_type, colors[1])
 
     players = [ player, opponent ]
     random.shuffle(players)
@@ -197,35 +200,32 @@ class Experiment(starNEAT):
     # Random
     num_games = 1000
     genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, [(0, RandomPlayer, 1)], neural_network_type, lobes, num_games=num_games)
-    print("The best genome won", games_won, "games out of", str(num_games), "against Random Player!")
-    print(genome_fitness/num_games)
+    print("The genome won", games_won, "games out of", str(num_games), "against Random Player! (avg victory points =", str(round(genome_fitness/num_games, 3)) + ")")
 
-    # # VictoryPointPlayer
-    # num_games = 1000
-    # genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, VictoryPointPlayer, neural_network_type, lobes, num_games=num_games)
-    # print("The best genome won", games_won, "games out of", str(num_games), "against VictoryPoint Player!")
+    # VictoryPointPlayer
+    num_games = 1000
+    genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, [(0, VictoryPointPlayer, 1)], neural_network_type, lobes, num_games=num_games)
+    print("The genome won", games_won, "games out of", str(num_games), "against VictoryPoint Player! (avg victory points =", str(round(genome_fitness/num_games, 3)) + ")")
 
-    # # WeightedRandom Player
-    # num_games = 1000
-    # genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, WeightedRandomPlayer, neural_network_type, lobes, num_games=num_games)
-    # print("The best genome won", games_won, "games out of", str(num_games), "against WeightedRandom Player!")
+    # WeightedRandom Player
+    num_games = 1000
+    genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, [(0, WeightedRandomPlayer, 1)], neural_network_type, lobes, num_games=num_games)
+    print("The genome won", games_won, "games out of", str(num_games), "against WeightedRandom Player! (avg victory points =", str(round(genome_fitness/num_games, 3)) + ")")
 
     # # GreedyPlayouts Player
-    # num_games = 15
-    # genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, GreedyPlayoutsPlayer, neural_network_type, lobes, num_games=num_games)
-    # print("The best genome won", games_won, "games out of", str(num_games), "against GreedyPlayouts Player!")
+    # num_games = 10
+    # genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, [(0, GreedyPlayoutsPlayer, 1)], neural_network_type, lobes, num_games=num_games)
+    # print("The genome won", games_won, "games out of", str(num_games), "against GreedyPlayouts Player! (avg victory points =", str(round(genome_fitness/num_games, 3)) + ")")
 
     # ValueFunction
     num_games = 25
     genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, [(0, ValueFunctionPlayer, 1)], neural_network_type, lobes, num_games=num_games)
-    print("The best genome won", games_won, "games out of", str(num_games), "against ValueFunction Player!")
-    print(genome_fitness/num_games)
+    print("The genome won", games_won, "games out of", str(num_games), "against ValueFunction Player! (avg victory points =", str(round(genome_fitness/num_games, 3)) + ")")
 
     # AlphaBeta(n=2) - CATANATRON
     num_games = 25
     genome_fitness, games_won = Experiment.evaluate_genome(genome, genome_config, [(0, AlphaBetaPlayer, 1)], neural_network_type, lobes, num_games=num_games)
-    print("The best genome won", games_won, "games out of", str(num_games), "against AlphaBeta(n=2) (CATANATRON)!")
-    print(genome_fitness/num_games)
+    print("The genome won", games_won, "games out of", str(num_games), "against AlphaBeta(n=2) (CATANATRON)! (avg victory points =", str(round(genome_fitness/num_games,3)) + ")")
 
 
   """
