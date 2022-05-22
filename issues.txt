@@ -1,8 +1,5 @@
-- there isnt really a way to currently know which agent is best, as a bunch of them all get 10/10...
-- maybe we need to run like 10 games per generation, add in the amount of turns in each game, give points for acquiring/spending resources, lose points for losing resources for more granularity
-- multiprocessed games.. run on 10 cores.
-- play_turn lobe
-- move_robber take resources from other players where available
-- print out each generation that we're currently at...
-- export the best player from the population...
-- start from a checkpoint
+- consider giving points for acquiring/spending resources, lose points for losing resources for more granularity - medium priority
+- move_robber take resources from other players where available - low priority
+- multithreaded crossover? - low priority - probably unnecessary - the biggest hold up is the opponent.
+- make sure file saving is happening asyncronously - low priority
+- consider crossover on lobes proportionally to how much they are used... - low priority
