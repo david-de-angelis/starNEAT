@@ -61,7 +61,10 @@ class Experiment(starNEAT):
   def evaluate_genomes(self, genomes, global_config):
     start_time = time.time()
 
-    opponent_type_list = self.get_worthy_opponent_type_list()
+    generation = self.population.generation
+    num_games_per_genome = 20
+    opponent_type_list = self.get_worthy_opponent_type_list(generation, num_games_per_genome)
+
     # Multithreading the game running...
     num_genomes = len(genomes)
     remaining_genomes = num_genomes
@@ -80,7 +83,7 @@ class Experiment(starNEAT):
       end_index = start_index + batch_size
 
       genome_subset = genomes[start_index:end_index]
-      process = pool.apply_async(self.evaluate_genome_subset, args=(genome_subset, global_config.genome_config, opponent_type_list, self.neural_network_type, self.lobes))
+      process = pool.apply_async(self.evaluate_genome_subset, args=(genome_subset, global_config.genome_config, opponent_type_list, self.neural_network_type, self.lobes, num_games_per_genome))
 
       processes.append(process)
       batches.append(genome_subset)
@@ -103,10 +106,10 @@ class Experiment(starNEAT):
     print("Peformed 1000 games multithreadedly in", time_taken, "seconds...")
 
   @staticmethod
-  def evaluate_genome_subset(genome_subset, genome_config, opponent_type_list, neural_network_type, lobes):
+  def evaluate_genome_subset(genome_subset, genome_config, opponent_type_list, neural_network_type, lobes, num_games_per_genome):
     subset_fitness = {}
     for genome_id, genome in genome_subset:
-        fitness, games_won = Experiment.evaluate_genome(genome, genome_config, opponent_type_list, neural_network_type, lobes, num_games=10)
+        fitness, games_won = Experiment.evaluate_genome(genome, genome_config, opponent_type_list, neural_network_type, lobes, num_games=num_games_per_genome)
         subset_fitness[genome_id] = fitness
 
     return subset_fitness
@@ -139,7 +142,6 @@ class Experiment(starNEAT):
     
       if (opponent_type is None):
         starting_game_index, opponent_type, reward_power = opponent_type_list[opponent_type_list_index]
-
 
       game = Experiment.play_game(brain, opponent_type)
       player_cumulative_fitness += Experiment.measure_fitness_from_game(game, reward_power, brain.color, opponent_type)
@@ -232,9 +234,12 @@ class Experiment(starNEAT):
     TODO: consider making the opponent harder as the population becomes more evolved.
     Return: A valid catan opponent type
   """
-  def get_worthy_opponent_type_list(self): 
-    #from game 0, play a weighted random player, from game 5, play a value function player...
-    return [(0, WeightedRandomPlayer, 1.5), (5, ValueFunctionPlayer, 2.0)] # (starting_game_index, opponent_type, reward_power)
+  def get_worthy_opponent_type_list(self, generation, num_games_per_genome):
+    #start off by playing no strong opponents, every [100] generations, add 1 strong opponent into the mix, until all games are against a strong opponent...
+    value_function_player_starting_index = num_games_per_genome - math.floor(generation/100)
+    value_function_player_starting_index = max(value_function_player_starting_index, 0)
+
+    return [(0, WeightedRandomPlayer, 1.5), (value_function_player_starting_index, ValueFunctionPlayer, 2.0)] # (starting_game_index, opponent_type, reward_power)
 
   @staticmethod
   def get_opponent_from_type(opponent_type, opponent_color):
