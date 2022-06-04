@@ -7,7 +7,7 @@ from catanatron.game import Game
 from catanatron.models.player import Player
 
 DEFAULT_NUM_PLAYOUTS = 25
-NUM_WORKERS = multiprocessing.cpu_count()
+NUM_WORKERS = 1 #multiprocessing.cpu_count()
 
 PLAYOUTS_BUDGET = 100
 
